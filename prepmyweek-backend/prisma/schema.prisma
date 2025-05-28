@@ -1,0 +1,94 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator default {
+  provider = "prisma-client-js"
+}
+
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum StoreSection {
+  DAIRY
+  BEVERAGE
+  DELI
+  BREAKFAST
+  MEAT_SEAFOOD
+  BREAD
+  CHEESE
+  BAKING
+  CANNED
+  SNACK
+  PRODUCE
+}
+
+enum Course {
+  BREAKFAST
+  LUNCH
+  DINNER
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  password  String
+  recipes   Recipe[]
+  createdAt DateTime @default(now())
+}
+
+model Recipe {
+  id           Int              @id @default(autoincrement())
+  title        String
+  author       String?
+  prepTime     Int?
+  cookTime     Int?
+  course       Course?
+  servings     Int?
+  description  String?
+  instructions String
+  user         User             @relation(fields: [userId], references: [id])
+  userId       Int
+  ingredients  RecipeIngredient[]
+  storeId      Int?
+  store        GroceryStore?    @relation(fields: [storeId], references: [id])
+  createdAt    DateTime         @default(now())
+}
+
+model Ingredient {
+  id          Int               @id @default(autoincrement())
+  name        String            @unique
+  substitutes String?
+  createdAt   DateTime          @default(now())
+  recipes     RecipeIngredient[]
+}
+
+model RecipeIngredient {
+  id            Int             @id @default(autoincrement())
+  recipeId      Int  
+  ingredientId  Int
+  quantity      Float
+  unit          String?
+  storeSection  StoreSection?
+  isOptional    Boolean         @default(false)
+  recipe        Recipe          @relation(fields: [recipeId], references: [id])
+  ingredient    Ingredient      @relation(fields: [ingredientId], references: [id])
+}
+
+model GroceryStore {
+  id       Int      @id @default(autoincrement())
+  name     String   @unique
+  logoUrl  String?   
+  recipes  Recipe[]
+}

@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+@theme {
+  --font-body: "Inter", sans-serif;
+  --font-brand: "Montserrat", sans-serif;
+  --color-brand: #d95c23;
+  --color-background: #d9f9fa;
+
+  /* Optional additions from shadcn's style system */
+  --radius: 0.5rem;
+  --input-padding: 0.75rem;
+  --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+@layer base {
+  :root {
+    font-family: var(--font-body);
+    background-color: var(--color-background);
+  }
+
+  body {
+    @apply text-gray-900 antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  nav,
+  button,
+  .font-brand {
+    font-family: var(--font-brand);
+  }
+}
