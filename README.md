@@ -9,7 +9,7 @@ Choose your grocery store, get curated recipes, and generate a smart grocery lis
 
 This repo contains both the frontend and backend:
 
-- `backend/` – Node.js, Express, Prisma, PostgreSQL
+- `prepmyweek-backend/` – Node.js, Express, Prisma, PostgreSQL
 - `prepmyweek-frontend/` – Old Vite/React frontend (archived)
 - `prepmyweek-frontend-next/` – New Next.js + TypeScript frontend (active)
 
@@ -31,7 +31,7 @@ Rather than delete the old Vite code, I’ve kept it in this repo to showcase my
 ### Backend
 
 ```bash
-cd backend
+cd prepmyweek-backend
 npm install
 npm run dev
 ```
