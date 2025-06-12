@@ -34,18 +34,25 @@ Rather than delete the old Vite code, I’ve kept it in this repo to showcase my
 cd backend
 npm install
 npm run dev
+```
 
 ### Frontend
+
+```bash
 cd prepmyweek-frontend-next
 npm install
 npm run dev
+```
+
 (Frontend runs on localhost:3001, backend on localhost:3000)
 
 ### Auth
+
 Authentication is handled via JWT and context hooks.
 Pages are protected both client- and server-side.
 
 ### Features
+
 -smart recipe selection based on store inventory
 -Grocery list generation grouped by store section
 -Admin panel to approve/reject user-submitted recipes
@@ -53,7 +60,10 @@ Pages are protected both client- and server-side.
 -Full CRUD for recipes and ingredients
 
 ## Author
-Benjamin Farthing - https://www.linkedin.com/in/benjamin-farthing-397a3064/
+
+Benjamin Farthing - [Linkedin](https://www.linkedin.com/in/benjamin-farthing-397a3064/)
 BootCamp Capstone Project 2025
+
+```
 
 ```
