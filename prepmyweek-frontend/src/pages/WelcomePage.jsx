@@ -7,7 +7,7 @@ export default function WelcomePage() {
       <div className="text-center space-y-6">
         <div className="flex items-center justify-center gap-2">
           <img
-            src="/public/logoNoBg.png"
+            src="/logoNoBg.png"
             alt="PrepMyWeek Logo"
             className="w-24 h-24"
           />

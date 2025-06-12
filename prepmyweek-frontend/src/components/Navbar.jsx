@@ -19,7 +19,7 @@ export default function Navbar({ onLogoClick }) {
         className="m-0 p-0 block hover:cursor-pointer"
       >
         <img
-          src="/logoNoPad.jpeg"
+          src="/logoNoPad.png"
           alt="PrepMyWeek logo"
           className="h-10 w-auto"
         />

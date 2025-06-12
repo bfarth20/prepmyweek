@@ -12,6 +12,7 @@ export function requireUser(req, res, next) {
     if (err) {
       return res.status(403).json({ error: "Invalid or expired token" });
     }
+    console.log("Decoded JWT userData:", userData);
     req.user = userData; //Attach user data to request object
     next();
   });
