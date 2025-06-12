@@ -60,7 +60,11 @@ router.post("/login", async (req, res) => {
     }
 
     const token = jwt.sign(
-      { userId: user.id, email: user.email },
+      {
+        userId: user.id,
+        email: user.email,
+        isAdmin: user.isAdmin,
+      },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
@@ -68,6 +72,67 @@ router.post("/login", async (req, res) => {
     res.json({ token });
   } catch (error) {
     res.status(500).json({ error: "Login failed" });
+  }
+});
+
+//GET user :id props
+router.get("/me", requireUser, async (req, res) => {
+  try {
+    console.log("Authenticated user ID:", req.user.userId);
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.userId },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        createdAt: true,
+        isAdmin: true,
+        //profileImageUrl: true,
+        recipes: {
+          select: {
+            id: true,
+            title: true,
+            imageUrl: true,
+            course: true,
+            prepTime: true,
+            cookTime: true,
+            status: true,
+          },
+        },
+        /*currentPrep: {
+          select: {
+            id: true,
+            weekStart: true,
+            dinners: {
+              select: { is: true, title: true },
+            },
+            lunches: {
+              select: { id: true, title: true },
+            },
+            groceryListGenerated: true,
+          },
+        },
+        savedPreps: {
+          select: {
+            id: true,
+            weekStart: true,
+            dinners: {
+              select: { id: true, title: true },
+            },
+            lunches: {
+              select: { id: true, title: true },
+            },
+          },
+        },*/
+      },
+    });
+
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    res.json(user);
+  } catch (error) {
+    console.error("Error in /me route:", error);
+    res.status(500).json({ error: "Failed to fetch user profile" });
   }
 });
 
