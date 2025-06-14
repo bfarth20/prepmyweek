@@ -44,7 +44,7 @@ export default function RecipeDetailClientPage({
     <main className="max-w-4xl mx-auto px-4 py-8 relative">
       <PrepTracker />
 
-      <div className="border rounded-lg p-4 shadow-sm bg-white flex flex-col justify-between">
+      <div className="rounded-lg p-4 shadow-2xl bg-white flex flex-col justify-between">
         <h1 className="text-3xl font-bold text-brand text-center">
           {recipe.title}
         </h1>
@@ -99,7 +99,7 @@ export default function RecipeDetailClientPage({
 
         <button
           onClick={handleAddToPrep}
-          className="mt-6 w-full bg-orange-500 text-white rounded px-4 py-2 hover:bg-orange-600 transition"
+          className="mt-6 w-full bg-brand text-white rounded px-4 py-2 hover:bg-orange-600 transition-transform duration-100 active:scale-95"
         >
           Add to Prep
         </button>

@@ -99,12 +99,14 @@ export default function ProfilePage() {
   return (
     <div className="max-w-3xl mx-auto p-4 space-y-6">
       <section>
-        <h1 className="text-2xl font-semibold mb-2">My Recipes</h1>
+        <h1 className="text-2xl font-bold font-brand text-brand mb-2">
+          My Recipes
+        </h1>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {profile.recipes.map((recipe) => (
             <div
               key={recipe.id}
-              className="border border-gray-300 rounded-lg p-4 shadow-sm bg-white"
+              className="border border-gray-300 rounded-lg p-4 shadow-sm bg-white  flex flex-col h-full"
             >
               {recipe.imageUrl && (
                 <Image
@@ -112,11 +114,11 @@ export default function ProfilePage() {
                   alt={recipe.title}
                   width={200}
                   height={200}
-                  className="object-cover rounded mb-2"
+                  className="object-cover rounded mb-2 mx-auto"
                 />
               )}
               <h3 className="text-lg font-medium">{recipe.title}</h3>
-              <p className="text-sm text-gray-600 capitalize">
+              <p className="text-sm text-gray-500 capitalize">
                 {recipe.course}
               </p>
 
@@ -135,10 +137,10 @@ export default function ProfilePage() {
                   {recipe.status}
                 </span>
               </p>
-              <div className="flex justify-around">
+              <div className="flex justify-around gap-x-4 mt-4 pt-4 mt-auto">
                 <Button
                   variant="default"
-                  className="text-sm"
+                  className="text-sm text-center"
                   href={`/recipes/${recipe.id}`}
                 >
                   View Recipe

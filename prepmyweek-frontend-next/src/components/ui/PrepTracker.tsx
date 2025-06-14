@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { usePrep } from "@/components/context/PrepContext";
 import { Button } from "@/components/ui/Button";
+import { useState } from "react";
 
 export function PrepTracker() {
   const router = useRouter();
@@ -16,6 +17,8 @@ export function PrepTracker() {
     useLeftovers,
     clearPrep,
   } = usePrep();
+
+  const [minimized, setMinimized] = useState(false);
 
   const people = numberOfPeople || 1;
   const numDinners = numberOfDinners || 0;
@@ -66,31 +69,60 @@ export function PrepTracker() {
   };
 
   return (
-    <div className="fixed top-4 right-4 z-50 bg-white shadow-lg rounded-xl p-4 w-72 border text-sm space-y-1">
-      <h3 className="text-lg font-semibold mb-2">Prep Progress</h3>
-      <p>
-        🍽️ Dinner servings: {dinnerServingsSelected} /{" "}
-        {totalDinnerServingsNeeded}
-      </p>
-      <p>
-        🥪 Lunch servings: {totalLunchServingsCounted} /{" "}
-        {totalLunchServingsNeeded}
-      </p>
-      {useLeftovers && (
-        <p className="text-xs text-gray-500">
-          Includes {leftoverLunchServings} from leftovers
-        </p>
+    <div
+      className={`fixed top-4 right-4 z-50 bg-white/90 shadow-lg rounded-xl p-2 w-auto max-w-[280px] border text-xs space-y-1 mx-2 sm:mx-0 transition-all duration-300`}
+    >
+      {/* Header with minimize toggle */}
+      <div className="flex justify-between items-center mb-1">
+        {!minimized ? (
+          <h3 className="text-base font-semibold">Prep Progress</h3>
+        ) : (
+          // Invisible placeholder with same width as the title to preserve space
+          <div className="invisible text-base font-semibold">Prep Progress</div>
+        )}
+        <button
+          aria-label={
+            minimized ? "Maximize prep progress" : "Minimize prep progress"
+          }
+          onClick={() => setMinimized(!minimized)}
+          className="text-sm font-bold px-2 py-1 hover:bg-gray-200 rounded"
+        >
+          {minimized ? "➕" : "➖"}
+        </button>
+      </div>
+
+      {/* Conditionally render the status text */}
+      {!minimized && (
+        <>
+          <p className="leading-tight">
+            🍽️ {dinnerServingsSelected} / {totalDinnerServingsNeeded} dinners
+          </p>
+          <p className="leading-tight">
+            🥪 {totalLunchServingsCounted} / {totalLunchServingsNeeded} lunches
+          </p>
+          {useLeftovers && (
+            <p className="text-[10px] text-gray-500 leading-tight">
+              Includes {leftoverLunchServings} leftover lunches
+            </p>
+          )}
+        </>
       )}
-      <Button onClick={handleResetPrep} variant="default" className="w-full">
+
+      {/* Buttons always visible */}
+      <Button
+        onClick={handleResetPrep}
+        variant="default"
+        className="w-full text-xs py-1 mt-1"
+      >
         Reset Prep
       </Button>
       {prepComplete && (
         <Button
           onClick={handleGoToSummary}
           variant="default"
-          className="w-full"
+          className="w-full text-xs py-1 mt-1"
         >
-          Go to Finished Prep
+          Finished Prep
         </Button>
       )}
     </div>

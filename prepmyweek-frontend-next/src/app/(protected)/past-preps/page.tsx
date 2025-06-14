@@ -50,6 +50,7 @@ export default function PastPrepsPage() {
 
   return (
     <div className="flex flex-col space-y-3">
+      <h1 className="font-brand text-brand text-2xl font-bold">Past Preps</h1>
       {pastPreps.map((prep) => (
         <Button key={prep.id} href={`/past-preps/${prep.id}`}>
           {prep.name}

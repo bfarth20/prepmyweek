@@ -103,9 +103,9 @@ export default function GroceryList() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
+    <div className="max-w-3xl mx-auto p-0">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Grocery List</h1>
+        <h1 className="text-2xl text-brand font-bold">Grocery List</h1>
         <Button
           variant="outline"
           onClick={() => {
@@ -119,7 +119,7 @@ export default function GroceryList() {
 
       {Array.from(grouped.entries()).map(([storeSection, items]) => (
         <div key={storeSection} className="mb-4">
-          <h2 className="font-semibold text-lg mb-2">
+          <h2 className="font-semibold text-brand text-lg mb-2">
             {formatSectionName(storeSection)}
           </h2>
           <div className="ml-5 space-y-1">

@@ -10,7 +10,7 @@ export default function StoreCard({
   return (
     <div
       onClick={onSelect}
-      className="rounded-2xl shadow-md p-4 bg-white hover:shadow-lg transition-shadow flex items-center gap-4 cursor-pointer"
+      className="rounded-2xl shadow-md p-4 bg-white hover:shadow-lg transition-shadow transition-transform duration-100 active:scale-95 flex items-center gap-4 cursor-pointer"
     >
       {store.logoUrl ? (
         <Image

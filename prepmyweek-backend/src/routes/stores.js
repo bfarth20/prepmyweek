@@ -51,27 +51,38 @@ router.get("/with-recipes", async (req, res) => {
   }
 });
 
-// GET /stores/:storeId/recipes - get all recipes for a specific grocery store
 router.get("/:storeId/recipes", async (req, res) => {
   const storeId = parseInt(req.params.storeId);
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 20; // default 20 recipes per page
+  const skip = (page - 1) * limit;
 
   try {
+    // Fetch total count for pagination
+    const totalCount = await prisma.recipe.count({
+      where: {
+        status: "approved",
+        recipeStores: {
+          some: { storeId },
+        },
+      },
+    });
+
+    // Fetch paginated recipes
     const recipes = await prisma.recipe.findMany({
       where: {
         status: "approved",
         recipeStores: {
-          some: {
-            storeId: storeId,
-          },
+          some: { storeId },
         },
       },
       include: {
         ingredients: {
-          include: {
-            ingredient: true,
-          },
+          include: { ingredient: true },
         },
       },
+      skip,
+      take: limit,
     });
 
     const formatted = recipes.map((r) => ({
@@ -92,7 +103,15 @@ router.get("/:storeId/recipes", async (req, res) => {
       })),
     }));
 
-    res.status(200).json({ data: formatted });
+    res.status(200).json({
+      data: formatted,
+      pagination: {
+        total: totalCount,
+        page,
+        limit,
+        totalPages: Math.ceil(totalCount / limit),
+      },
+    });
   } catch (error) {
     console.error("Error fetching store recipes:", error);
     res.status(500).json({ error: "Failed to fetch store recipes" });

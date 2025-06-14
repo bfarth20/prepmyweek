@@ -28,7 +28,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-color-background flex flex-col items-center px-4">
       {/* Logo and Header */}
-      <div className="flex items-center gap-2 mb-8">
+      <div className="flex items-center justify-center gap-2 mb-8">
         <img src="/logoNoBg.png" alt="PrepMyWeek Logo" className="w-20 h-20" />
         <h1 className="text-4xl font-bold font-brand text-brand">PrepMyWeek</h1>
       </div>

@@ -21,21 +21,48 @@ router.get("/", async (req, res) => {
 router.post("/", async (req, res) => {
   const { email, name, password } = req.body;
 
+  // Basic validation
+  if (!name || name.trim().length < 2) {
+    return res
+      .status(400)
+      .json({ error: "Name must be at least 2 characters long." });
+  }
+
+  if (!email || !/^[\w.-]+@[\w.-]+\.\w+$/.test(email)) {
+    return res.status(400).json({ error: "Invalid email format." });
+  }
+
+  if (!password || password.length < 8) {
+    return res
+      .status(400)
+      .json({ error: "Password must be at least 8 characters long." });
+  }
+
   try {
+    // Check for existing email
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (existingUser) {
+      return res
+        .status(409)
+        .json({ error: "An account with this email already exists." });
+    }
+
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
     const newUser = await prisma.user.create({
       data: {
         email,
-        name,
+        name: name.trim(),
         password: hashedPassword,
       },
     });
 
-    res
-      .status(201)
-      .json({ message: "User created successfully", user: newUser });
+    res.status(201).json({
+      message: "User created successfully",
+      user: { id: newUser.id, email: newUser.email, name: newUser.name },
+    });
   } catch (error) {
+    console.error("Error creating user:", error);
     res.status(500).json({ error: "Failed to create user" });
   }
 });
@@ -43,6 +70,8 @@ router.post("/", async (req, res) => {
 // User login
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
+
+  console.log("Login attempt:", req.body);
 
   try {
     const user = await prisma.user.findUnique({
@@ -99,31 +128,6 @@ router.get("/me", requireUser, async (req, res) => {
             status: true,
           },
         },
-        /*currentPrep: {
-          select: {
-            id: true,
-            weekStart: true,
-            dinners: {
-              select: { is: true, title: true },
-            },
-            lunches: {
-              select: { id: true, title: true },
-            },
-            groceryListGenerated: true,
-          },
-        },
-        savedPreps: {
-          select: {
-            id: true,
-            weekStart: true,
-            dinners: {
-              select: { id: true, title: true },
-            },
-            lunches: {
-              select: { id: true, title: true },
-            },
-          },
-        },*/
       },
     });
 
@@ -133,20 +137,6 @@ router.get("/me", requireUser, async (req, res) => {
   } catch (error) {
     console.error("Error in /me route:", error);
     res.status(500).json({ error: "Failed to fetch user profile" });
-  }
-});
-
-//Example protected route
-router.get("/me", requireUser, async (req, res) => {
-  try {
-    const user = await prisma.user.findUnique({
-      where: { id: req.user.userId },
-      select: { id: true, email: true, name: true }, //exclude password
-    });
-
-    res.json(user);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to fetch user info" });
   }
 });
 

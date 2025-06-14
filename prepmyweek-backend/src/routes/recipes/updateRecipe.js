@@ -4,7 +4,8 @@
  */
 
 import { prisma } from "../../prismaClient.js";
-import { validateRecipeData } from "./validateRecipeData.js";
+import { createRecipeSchema } from "../../schemas/recipe.schema.js";
+import { z } from "zod";
 
 // Helper function to send a consistent JSON response
 const sendResponse = (res, status, payload) => {
@@ -15,7 +16,22 @@ const sendResponse = (res, status, payload) => {
 export const updateRecipe = async (req, res) => {
   const recipeId = parseInt(req.params.id);
 
-  // Destructure expected fields from request body
+  let validatedData;
+  try {
+    validatedData = createRecipeSchema.parse(req.body);
+  } catch (err) {
+    if (err instanceof z.ZodError) {
+      return sendResponse(res, 400, {
+        error: err.errors.map((e) => ({
+          path: e.path.join("."),
+          message: e.message,
+        })),
+      });
+    }
+    return sendResponse(res, 500, { error: "Unexpected validation error" });
+  }
+
+  // destructure validated data
   const {
     title,
     description,
@@ -27,7 +43,7 @@ export const updateRecipe = async (req, res) => {
     storeIds = [],
     ingredients = [],
     imageUrl,
-  } = req.body;
+  } = validatedData;
 
   try {
     // Look up the recipe and verify the user owns it
@@ -39,23 +55,6 @@ export const updateRecipe = async (req, res) => {
       return sendResponse(res, 403, {
         error: "Unauthorized to edit this recipe",
       });
-    }
-
-    // Validate the incoming recipe data
-    const validationError = validateRecipeData({
-      title,
-      description,
-      instructions,
-      prepTime,
-      cookTime,
-      course,
-      servings,
-      storeIds,
-      ingredients,
-    });
-
-    if (validationError) {
-      return sendResponse(res, 400, { error: validationError });
     }
 
     // Update core recipe fields
@@ -89,6 +88,22 @@ export const updateRecipe = async (req, res) => {
         typeof ing.name === "string" &&
         ing.name.trim().length >= 2
     );
+
+    // Extract IDs of ingredients submitted that have recipeIngredientId (existing ingredients)
+    const submittedIngredientIds = validIngredients
+      .filter((ing) => ing.recipeIngredientId)
+      .map((ing) => ing.recipeIngredientId);
+
+    // Delete all recipeIngredients for this recipe that are NOT in the submitted IDs
+    await prisma.recipeIngredient.deleteMany({
+      where: {
+        recipeId,
+        id: {
+          notIn:
+            submittedIngredientIds.length > 0 ? submittedIngredientIds : [0],
+        },
+      },
+    });
 
     for (const ing of validIngredients) {
       // Normalize and validate the ingredient name

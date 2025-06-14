@@ -36,11 +36,19 @@ export default function SaveToPastPrep({ recipeIds }: { recipeIds: number[] }) {
 
   return (
     <>
-      <div className="mt-4">
-        <Button onClick={() => setShowDialog(true)}>Save to Past Preps</Button>
+      <div>
+        <Button
+          className="w-full sm:w-auto"
+          onClick={() => setShowDialog(true)}
+        >
+          Save to Past Preps
+        </Button>
 
         {showDialog && (
-          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div
+            className="fixed inset-0 flex items-center justify-center z-50"
+            style={{ backgroundColor: "rgba(128, 128, 128, 0.7)" }}
+          >
             <div className="bg-white p-6 rounded-lg shadow-lg w-96">
               <h2 className="text-xl font-semibold mb-4">Name this prep</h2>
               <Input
@@ -48,7 +56,7 @@ export default function SaveToPastPrep({ recipeIds }: { recipeIds: number[] }) {
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. Weekday Favorites"
               />
-              <div className="flex justify-end space-x-2">
+              <div className="flex justify-end space-x-2 pt-2">
                 <Button
                   variant="secondary"
                   onClick={() => setShowDialog(false)}

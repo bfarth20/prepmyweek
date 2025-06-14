@@ -26,7 +26,7 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-color-background flex flex-col items-center justify-center px-4">
+    <div className="min-h-screen bg-color-background flex flex-col items-center px-4">
       <div className="flex items-center gap-2 mb-8">
         <img src="/logoNoBg.png" alt="PrepMyWeek Logo" className="w-20 h-20" />
         <h1 className="text-4xl font-bold font-brand text-brand">PrepMyWeek</h1>

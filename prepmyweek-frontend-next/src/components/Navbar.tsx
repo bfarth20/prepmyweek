@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/Button";
 
 interface NavbarProps {
   onLogoClick?: () => void;
@@ -37,12 +38,7 @@ export default function Navbar({ onLogoClick }: NavbarProps) {
         <Link href="/login" className="text-gray-700 hover:text-gray-900">
           Log In
         </Link>
-        <Link
-          href="/signup"
-          className="bg-brand text-white px-4 py-2 rounded hover:bg-green-600"
-        >
-          Sign Up
-        </Link>
+        <Button href="/signup">Sign Up</Button>
       </div>
     </nav>
   );

@@ -6,7 +6,6 @@ import { Input } from "./ui/Input";
 import { Button } from "./ui/Button";
 import API_BASE_URL from "@/lib/config"; //<--needs Axios
 import { useRouter } from "next/navigation";
-import { Toast } from "@/components/ui/Toast";
 
 interface IngredientInput {
   id: string;
@@ -24,10 +23,10 @@ interface GroceryStore {
 }
 
 interface AddRecipeFormProps {
-  onError: React.Dispatch<React.SetStateAction<string | null>>;
+  onShowToast: (message: string, type?: "success" | "error") => void;
 }
 
-export default function AddRecipeForm({ onError }: AddRecipeFormProps) {
+export default function AddRecipeForm({ onShowToast }: AddRecipeFormProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [instructions, setInstructions] = useState("");
@@ -37,7 +36,6 @@ export default function AddRecipeForm({ onError }: AddRecipeFormProps) {
   const [cookTime, setCookTime] = useState<number | null>(null);
   const [servings, setServings] = useState<number | null>(null);
   const [selectedStoreIds, setSelectedStoreIds] = useState<number[]>([]);
-  const [showToast, setShowToast] = useState(false);
   const router = useRouter();
   const [ingredients, setIngredients] = useState<IngredientInput[]>([
     {
@@ -60,11 +58,11 @@ export default function AddRecipeForm({ onError }: AddRecipeFormProps) {
         setStoreList(json.data);
       } catch (err) {
         console.error("Failed to load stores", err);
-        onError("Could not load grocery stores. Please try again later");
+        onShowToast("Could not load grocery stores. Please try again later");
       }
     };
     fetchStores();
-  }, [onError]);
+  }, []);
 
   const handleIngredientChange = (
     id: string,
@@ -104,20 +102,21 @@ export default function AddRecipeForm({ onError }: AddRecipeFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    onShowToast("");
 
     // Client-side validation
     if (!title.trim()) {
-      onError("Recipe title is required.");
+      onShowToast("Recipe title is required.", "error");
       return;
     }
 
     if (!instructions.trim()) {
-      onError("Instructions are required.");
+      onShowToast("Instructions are required.", "error");
       return;
     }
 
     if (ingredients.length === 0) {
-      onError("At least one ingredient is required.");
+      onShowToast("At least one ingredient is required.", "error");
       return;
     }
 
@@ -130,15 +129,16 @@ export default function AddRecipeForm({ onError }: AddRecipeFormProps) {
     );
 
     if (incompleteIngredient) {
-      onError(
-        "Each ingredient must have a name, quantity > 0, unit, and store section."
+      onShowToast(
+        "Each ingredient must have a name, quantity > 0, unit, and store section.",
+        "error"
       );
       return;
     }
 
     const token = localStorage.getItem("token");
     if (!token) {
-      onError("You must be logged in to submit a recipe.");
+      onShowToast("You must be logged in to submit a recipe.", "error");
       return;
     }
 
@@ -177,23 +177,32 @@ export default function AddRecipeForm({ onError }: AddRecipeFormProps) {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || "Failed to submit recipe");
+        // Don't call res.json() again here; use the already parsed 'data'
+        const errorMessages = Array.isArray(data.error)
+          ? data.error.map((err: any) => err.message).join(", ")
+          : data.error || "Failed to submit recipe";
+
+        onShowToast(errorMessages, "error");
+        return;
       }
-      // Show toast
-      setShowToast(true);
+
+      // Show success toast
+      onShowToast(
+        "Recipe submitted successfully and is pending approval.",
+        "success"
+      );
 
       // Redirect after 3 seconds
       setTimeout(() => {
-        setShowToast(false);
         router.push("/home");
       }, 3000);
     } catch (error: unknown) {
       if (error instanceof Error) {
         console.error("Submit error:", error);
-        onError(error.message || "An unknown error occurred.");
+        onShowToast(error.message || "An unknown error occurred.", "error");
       } else {
         console.error("Unexpected error:", error);
-        onError("An unknown error occurred.");
+        onShowToast("An unknown error occurred.");
       }
     }
   };
@@ -329,15 +338,19 @@ export default function AddRecipeForm({ onError }: AddRecipeFormProps) {
           >
             <option value="">Select an image...</option>
             <option value="/Images/Recipes/Bbq.png">Bbq</option>
+            <option value="/Images/Recipes/Breakfast.png">Breakfast</option>
             <option value="/Images/Recipes/Casserole.png">Casserole</option>
             <option value="/Images/Recipes/Chicken.png">Chicken</option>
             <option value="/Images/Recipes/Fish.png">Fish</option>
+            <option value="/Images/Recipes/Mexican.png">Mexican</option>
             <option value="/Images/Recipes/Pasta.png">Pasta</option>
             <option value="/Images/Recipes/Pie.png">Pie</option>
+            <option value="/Images/Recipes/Pizza.png">Pizza</option>
             <option value="/Images/Recipes/Pork.png">Pork</option>
             <option value="/Images/Recipes/Salad.png">Salad Bowl</option>
             <option value="/Images/Recipes/Sandwich.png">Sandwich</option>
             <option value="/Images/Recipes/Seafood.png">Seafood</option>
+            <option value="/Images/Recipes/Soup.png">Soup</option>
             <option value="/Images/Recipes/StirFry.png">Stirfry</option>
           </select>
         </div>
@@ -464,13 +477,6 @@ export default function AddRecipeForm({ onError }: AddRecipeFormProps) {
           </Button>
         </div>
       </form>
-
-      {showToast && (
-        <Toast
-          message="Recipe submitted successfully and is pending approval."
-          onClose={() => setShowToast(false)}
-        />
-      )}
     </>
   );
 }

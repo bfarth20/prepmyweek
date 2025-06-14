@@ -1,11 +1,12 @@
 // app/layout.tsx
 import "./globals.css";
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Montserrat } from "next/font/google";
 import { AuthProvider } from "../components/context/AuthContext";
 import { PrepProvider } from "../components/context/PrepContext";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], variable: "--font-body" });
+const montserrat = Montserrat({ subsets: ["latin"], variable: "--font-brand" });
 
 export const metadata: Metadata = {
   title: "PrepMyWeek",
@@ -18,8 +19,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
+    <html lang="en" className={`${inter.variable} ${montserrat.variable}`}>
+      <body>
         <AuthProvider>
           <PrepProvider>{children}</PrepProvider>
         </AuthProvider>

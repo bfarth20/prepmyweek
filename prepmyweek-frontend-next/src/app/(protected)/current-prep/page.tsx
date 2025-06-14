@@ -72,12 +72,17 @@ export default function CurrentPrepPage() {
             ))}
           </div>
 
-          <div className="pt-8 space-y-4">
-            <Button href="/my-week/grocery-list?source=current">
+          <div className="pt-8 flex flex-col sm:flex-row gap-4">
+            <Button
+              className="w-full sm:w-auto"
+              href="/my-week/grocery-list?source=current"
+            >
               View Grocery List
             </Button>
 
-            <SaveToPastPrep recipeIds={recipeIds} />
+            <div className="w-full sm:w-auto">
+              <SaveToPastPrep recipeIds={recipeIds} />
+            </div>
           </div>
         </>
       )}

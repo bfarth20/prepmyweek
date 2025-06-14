@@ -57,3 +57,7 @@
 .animate-fade-in-out {
   animation: fade-in-out 2.5s ease-in-out forwards;
 }
+
+.font-brand {
+  font-family: var(--font-brand);
+}

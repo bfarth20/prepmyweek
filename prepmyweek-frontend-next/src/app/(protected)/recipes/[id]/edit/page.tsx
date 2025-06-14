@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import axios from "axios";
 import API_BASE_URL from "@/lib/config";
 import type { RecipeDetail, Store } from "@/lib/types";
-import RecipeEditForm from "./RecipeEditForm"; // This stays a client component
+import RecipeEditForm from "./RecipeEditForm";
 
 export default async function EditRecipePage({
   params,

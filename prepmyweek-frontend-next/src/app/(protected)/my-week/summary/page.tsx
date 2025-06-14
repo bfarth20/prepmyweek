@@ -64,11 +64,13 @@ export default function WeekSummaryPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
-      <h1 className="text-3xl font-bold font-brand">Your Week Summary</h1>
+      <h1 className="text-3xl font-bold text-brand font-brand">
+        Your Week Summary
+      </h1>
 
       {selectedDinners.length > 0 && (
         <div>
-          <h2 className="text-2xl font-semibold font-brand mb-2">
+          <h2 className="text-2xl font-semibold text-brand font-bold font-brand mb-2">
             Dinner Recipes
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -81,7 +83,9 @@ export default function WeekSummaryPage() {
 
       {selectedLunches.length > 0 && (
         <div>
-          <h2 className="text-2xl font-semibold mt-6 mb-2">Lunch Recipes</h2>
+          <h2 className="text-2xl text-brand font-semibold mt-6 mb-2">
+            Lunch Recipes
+          </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {selectedLunches.map((recipe) => (
               <RecipeCard key={`lunch-${recipe.id}`} recipe={recipe} />

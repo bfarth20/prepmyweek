@@ -8,6 +8,7 @@ import storesRouter from "./routes/stores.js";
 import currentPrepRouter from "./routes/currentPrep.js";
 import pastPrepRoutes from "./routes/pastpreps/index.js";
 import adminRoutes from "./routes/admin.js";
+import { ZodError } from "zod";
 
 dotenv.config();
 
@@ -27,6 +28,22 @@ app.use("/api/stores", storesRouter);
 app.use("/api/current-prep", currentPrepRouter);
 app.use("/api/past-preps", pastPrepRoutes);
 app.use("/api/admin", adminRoutes);
+
+app.use((err, req, res, next) => {
+  console.error(err); // log error for debugging
+
+  if (err instanceof ZodError) {
+    return res.status(400).json({
+      error: "Validation failed",
+      issues: err.errors,
+    });
+  }
+
+  // fallback generic error handler
+  res.status(err.status || 500).json({
+    error: err.message || "Internal Server Error",
+  });
+});
 
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);

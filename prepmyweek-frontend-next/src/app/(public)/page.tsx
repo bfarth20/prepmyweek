@@ -2,24 +2,29 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
+import Image from "next/image";
 
 export default function WelcomePage() {
   return (
-    <div className="min-h-screen flex-col justify-center items-center bg-background text-gray-800 p-6">
+    <div className="min-h-screen flex flex-col items-center py-40 md:justify-start bg-background text-gray-800 p-6 max-h-screen overflow-auto">
       <div className="text-center space-y-6">
         <div className="flex items-center justify-center gap-2">
-          <img
+          <Image
             src="/logoNoBg.png"
             alt="PrepMyWeek Logo"
-            className="w-24 h-24"
+            width={64} // base mobile size
+            height={64}
+            className="sm:w-20 sm:h-20 md:w-24 md:h-24"
+            priority // optional: speeds up load if it's above the fold
           />
-          <h1 className="text-5xl font-bold font-brand text-brand">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-brand text-brand">
             PrepMyWeek
           </h1>
         </div>
-        <p className="text-xl text-gray-700">Plan smarter. Shop easier.</p>
-
-        <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8">
+        <p className="text-base sm:text-lg md:text-xl text-gray-700">
+          Plan smarter. Shop easier.
+        </p>
+        <div className="flex flex-row justify-center gap-4 mt-8">
           <Link href="/login">
             <Button>Log In</Button>
           </Link>

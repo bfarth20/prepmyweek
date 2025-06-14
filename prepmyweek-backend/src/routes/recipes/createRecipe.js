@@ -4,7 +4,8 @@
  */
 
 import { prisma } from "../../prismaClient.js";
-import { validateRecipeData } from "./validateRecipeData.js";
+import { createRecipeSchema } from "../../schemas/recipe.schema.js";
+import { z } from "zod";
 
 const sendResponse = (res, status, payload) => {
   const success = status < 400;
@@ -13,6 +14,20 @@ const sendResponse = (res, status, payload) => {
 
 export const createRecipe = async (req, res) => {
   const userId = req.user.userId;
+
+  let parsed;
+  try {
+    console.log("Raw request body:", req.body);
+    parsed = createRecipeSchema.parse(req.body);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      console.error("Zod validation errors:", error.errors);
+      return sendResponse(res, 400, { error: error.errors });
+    }
+    console.error("Validation failed:", error);
+    return sendResponse(res, 500, { error: "Server error during validation" });
+  }
+
   const {
     title,
     description,
@@ -24,24 +39,7 @@ export const createRecipe = async (req, res) => {
     storeIds = [],
     ingredients = [],
     imageUrl,
-  } = req.body;
-
-  // Validate required fields
-  const validationError = validateRecipeData({
-    title,
-    description,
-    instructions,
-    prepTime,
-    cookTime,
-    course,
-    servings,
-    storeIds,
-    ingredients,
-  });
-
-  if (validationError) {
-    return sendResponse(res, 400, { error: validationError });
-  }
+  } = parsed;
 
   try {
     // Create the recipe

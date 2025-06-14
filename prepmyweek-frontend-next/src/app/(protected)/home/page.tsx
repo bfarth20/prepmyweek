@@ -29,42 +29,42 @@ export default function HomePage() {
       <div className="grid gap-4">
         <Link
           href="/profile"
-          className="block bg-white shadow p-4 rounded hover:bg-gray-50"
+          className="block bg-white shadow p-4 rounded hover:bg-gray-50 transition-transform duration-100 active:scale-95"
         >
           View MyRecipes
         </Link>
 
         <Link
           href="/stores"
-          className="block bg-brand text-white p-4 rounded hover:bg-green-600"
+          className="block bg-brand text-white p-4 rounded hover:bg-green-600 transition-transform duration-100 active:scale-95"
         >
           Start a Fresh Prep
         </Link>
 
         <Link
           href="/current-prep"
-          className="block bg-white shadow p-4 rounded hover:bg-gray-50"
+          className="block bg-white shadow p-4 rounded hover:bg-gray-50 transition-transform duration-100 active:scale-95"
         >
           View CurrentPrep
         </Link>
 
         <Link
           href="/past-preps"
-          className="block bg-white shadow p-4 rounded hover:bg-gray-50"
+          className="block bg-white shadow p-4 rounded hover:bg-gray-50 transition-transform duration-100 active:scale-95"
         >
           View PastPreps
         </Link>
 
         <Link
           href="/add-recipe"
-          className="block bg-white shadow p-4 rounded hover:bg-gray-50"
+          className="block bg-white shadow p-4 rounded hover:bg-gray-50 transition-transform duration-100 active:scale-95"
         >
           Add a Recipe!
         </Link>
         {user?.isAdmin && (
           <Link
             href="/admin"
-            className="block bg-white shadow p-4 rounded hover:bg-gray-50 mb-4"
+            className="block bg-white shadow p-4 rounded hover:bg-gray-50 mb-4 transition-transform duration-100 active:scale-95"
           >
             Go To Admin Panel
           </Link>

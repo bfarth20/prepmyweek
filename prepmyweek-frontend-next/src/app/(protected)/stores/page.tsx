@@ -92,14 +92,6 @@ export default function StoresSelectionPage() {
         ))}
       </div>
 
-      {/* COMMENTED OUT UNTIL I WANT TO ADD
-      <div className="mt-12 text-center">
-        <Button variant="outline" size="lg">
-          Add a Grocery Store
-        </Button>
-      </div> 
-      */}
-
       {isModalOpen && selectedStore && (
         <PrepConfigModal
           store={selectedStore}
