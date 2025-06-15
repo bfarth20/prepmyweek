@@ -1,14 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-//import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
+import { Toast } from "@/components/ui/Toast";
 import API_BASE_URL from "@/lib/config";
-import Image from "next/image"; //<-- page needs protection
+import Image from "next/image";
 import axios, { AxiosError } from "axios";
 
 interface Recipe {
-  //<-- call the types from .lib instead
   id: number;
   title: string;
   imageUrl: string | null;
@@ -28,7 +27,17 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loadingDelete, setLoadingDelete] = useState<number | null>(null);
-  //const router = useRouter();
+
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastType, setToastType] = useState<"success" | "error">("success");
+
+  const showToast = (
+    message: string,
+    type: "success" | "error" = "success"
+  ) => {
+    setToastMessage(message);
+    setToastType(type);
+  };
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -59,7 +68,9 @@ export default function ProfilePage() {
   }, []);
 
   const handleDelete = async (recipeId: number) => {
-    const confirmed = confirm("Are you sure you want to delete this recipe?");
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this recipe?"
+    );
     if (!confirmed) return;
 
     try {
@@ -67,7 +78,7 @@ export default function ProfilePage() {
 
       const token = localStorage.getItem("token");
       if (!token) {
-        alert("You must be logged in to delete a recipe.");
+        showToast("You must be logged in to delete a recipe.", "error");
         return;
       }
 
@@ -80,9 +91,11 @@ export default function ProfilePage() {
           ? { ...prev, recipes: prev.recipes.filter((r) => r.id !== recipeId) }
           : prev
       );
+
+      showToast("Recipe deleted successfully.", "success");
     } catch (err) {
       console.error(err);
-      alert("Failed to delete recipe.");
+      showToast("Failed to delete recipe.", "error");
     } finally {
       setLoadingDelete(null);
     }
@@ -98,6 +111,14 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-3xl mx-auto p-4 space-y-6">
+      {toastMessage && (
+        <Toast
+          message={toastMessage}
+          type={toastType}
+          onClose={() => setToastMessage(null)}
+        />
+      )}
+
       <section>
         <h1 className="text-2xl font-bold font-brand text-brand mb-2">
           My Recipes
@@ -106,7 +127,7 @@ export default function ProfilePage() {
           {profile.recipes.map((recipe) => (
             <div
               key={recipe.id}
-              className="border border-gray-300 rounded-lg p-4 shadow-sm bg-white  flex flex-col h-full"
+              className="border border-gray-300 rounded-lg p-4 shadow-sm bg-white flex flex-col h-full"
             >
               {recipe.imageUrl && (
                 <Image
@@ -122,7 +143,6 @@ export default function ProfilePage() {
                 {recipe.course}
               </p>
 
-              {/* Add status here */}
               <p className="mt-1 text-sm font-semibold">
                 Recipe Status:{" "}
                 <span

@@ -61,3 +61,48 @@
 .font-brand {
   font-family: var(--font-brand);
 }
+
+@media print {
+  /* Hide anything non-essential */
+  nav,
+  footer,
+  .no-print,
+  button {
+    display: none !important;
+  }
+
+  /* Remove padding/margins that waste paper space */
+  body {
+    padding: 0;
+    margin: 0;
+  }
+
+  /* Maximize content area for printing */
+  main,
+  .print-area {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+  }
+
+  /* Optional: adjust font size for print */
+  body {
+    font-size: 12pt;
+  }
+
+  /* Avoid page breaks within grocery sections */
+  h2 {
+    page-break-after: avoid;
+  }
+
+  /* Optional: show checkboxes as squares */
+  input[type="checkbox"] {
+    appearance: none;
+    border: 1px solid #333;
+    width: 14px;
+    height: 14px;
+    margin-right: 6px;
+    position: relative;
+    top: 2px;
+  }
+}

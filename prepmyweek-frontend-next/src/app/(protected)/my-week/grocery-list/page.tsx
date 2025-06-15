@@ -18,8 +18,8 @@ export default function GroceryListPage() {
   if (loading || !user) return null;
 
   return (
-    <div className="flex justify-center items-start min-h-screen py-8">
-      <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-xl">
+    <div className="flex justify-center items-start min-h-screen py-8 px-0">
+      <div className="bg-white rounded-2xl shadow-lg p-6 w-full max-w-xl mx-auto">
         <GroceryList />
       </div>
     </div>

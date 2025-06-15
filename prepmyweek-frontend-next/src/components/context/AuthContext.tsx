@@ -31,35 +31,36 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string>("");
-
-  useEffect(() => {
-    const savedToken = localStorage.getItem("token");
-    if (savedToken) {
-      setToken(savedToken);
-    } else {
-      setLoading(false);
-    }
-  }, []);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    if (token) {
-      axios
-        .get(`${API_BASE_URL}/users/me`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then((res) => setUser(res.data))
-        .catch(() => {
-          setToken("");
-          setUser(null);
-          localStorage.removeItem("token");
-        })
-        .finally(() => setLoading(false));
+    const savedToken = localStorage.getItem("token");
+
+    if (!savedToken) {
+      setUser(null);
+      setLoading(false);
+      return;
     }
-  }, [token]);
+
+    setToken(savedToken);
+
+    axios
+      .get(`${API_BASE_URL}/users/me`, {
+        headers: { Authorization: `Bearer ${savedToken}` },
+      })
+      .then((res) => {
+        setUser(res.data);
+      })
+      .catch(() => {
+        setUser(null);
+        setToken("");
+        localStorage.removeItem("token");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
@@ -69,6 +70,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       localStorage.setItem("token", data.token);
       setToken(data.token);
+
+      // Immediately fetch user after login
+      const res = await axios.get(`${API_BASE_URL}/users/me`, {
+        headers: { Authorization: `Bearer ${data.token}` },
+      });
+
+      setUser(res.data);
       return true;
     } catch (error: unknown) {
       const axiosError = error as AxiosError;
@@ -99,11 +107,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       localStorage.setItem("token", data.token);
       setToken(data.token);
+
+      // Immediately fetch user after signup
+      const res = await axios.get(`${API_BASE_URL}/users/me`, {
+        headers: { Authorization: `Bearer ${data.token}` },
+      });
+
+      setUser(res.data);
       return true;
     } catch (error: unknown) {
       const axiosError = error as AxiosError;
       console.error(
-        "Login failed:",
+        "Signup failed:",
         axiosError.response?.data || axiosError.message
       );
       return false;

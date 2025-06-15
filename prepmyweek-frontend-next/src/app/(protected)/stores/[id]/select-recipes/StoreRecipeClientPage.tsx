@@ -58,8 +58,12 @@ export default function StoreRecipeClientPage({
         const json: PaginatedResponse = await res.json();
         setRecipes(json.data);
         setTotalPages(json.pagination.totalPages);
-      } catch (err: any) {
-        setError(err.message || "Unknown error");
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("Unknown error");
+        }
       } finally {
         setLoadingRecipes(false);
       }

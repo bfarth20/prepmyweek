@@ -34,8 +34,10 @@ export interface RecipeDetail {
   course: string;
   instructions: string;
   user: User;
+  userId: number;
   status: "pending" | "approved" | "rejected";
   ingredients: RecipeIngredient[];
+  createdAt: string;
   stores: Store[];
 }
 
@@ -57,7 +59,7 @@ export interface RecipeSummary {
   servings: number | null;
   ingredientCount: number | null;
   imageUrl?: string | null;
-  course: "BREAKFAST" | "LUNCH" | "DINNER";
+  course: string;
 }
 
 export type PastPrep = {
@@ -81,7 +83,7 @@ export type Recipe = {
   ingredientCount: number | null;
   imageUrl?: string | null;
   ingredients?: SimpleIngredient[];
-  course: "BREAKFAST" | "LUNCH" | "DINNER";
+  course: string;
 };
 
 // New type for normalized ingredients stored in context state
@@ -104,6 +106,7 @@ export interface NormalizedRecipe {
   ingredientCount: number | null;
   imageUrl?: string | null;
   ingredients: NormalizedIngredient[];
+  course: string;
 }
 
 export type PrepConfig = {

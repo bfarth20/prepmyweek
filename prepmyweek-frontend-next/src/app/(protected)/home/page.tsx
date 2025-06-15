@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useAuth } from "@/components/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { FeedbackButton } from "@/components/FeedbackButton";
+import { Button } from "@/components/ui/Button";
 
 export default function HomePage() {
   const { user, loading } = useAuth();
@@ -13,7 +15,7 @@ export default function HomePage() {
     if (!loading && !user) {
       router.push("/login");
     }
-  }, [user, loading, router]);
+  }, [user, loading]);
 
   if (loading || !user) return null;
 
@@ -22,52 +24,38 @@ export default function HomePage() {
       {user?.isAdmin && (
         <p className="mb-4 text-green-600 font-semibold">sup dude</p>
       )}
-      <h1 className="text-3xl font-bold mb-4">
+      <h1 className="text-3xl text-brand font-bold mb-4">
         Welcome, {user?.name || "Friend"}!
       </h1>
 
       <div className="grid gap-4">
-        <Link
-          href="/profile"
-          className="block bg-white shadow p-4 rounded hover:bg-gray-50 transition-transform duration-100 active:scale-95"
-        >
+        <Button variant="whiteblock" href="/profile">
           View MyRecipes
-        </Link>
+        </Button>
 
         <Link
           href="/stores"
           className="block bg-brand text-white p-4 rounded hover:bg-green-600 transition-transform duration-100 active:scale-95"
         >
-          Start a Fresh Prep
+          Start a FreshPrep
         </Link>
 
-        <Link
-          href="/current-prep"
-          className="block bg-white shadow p-4 rounded hover:bg-gray-50 transition-transform duration-100 active:scale-95"
-        >
+        <Button variant="whiteblock" href="/current-prep">
           View CurrentPrep
-        </Link>
+        </Button>
 
-        <Link
-          href="/past-preps"
-          className="block bg-white shadow p-4 rounded hover:bg-gray-50 transition-transform duration-100 active:scale-95"
-        >
+        <Button variant="whiteblock" href="/past-preps">
           View PastPreps
-        </Link>
+        </Button>
 
-        <Link
-          href="/add-recipe"
-          className="block bg-white shadow p-4 rounded hover:bg-gray-50 transition-transform duration-100 active:scale-95"
-        >
+        <Button variant="whiteblock" href="/add-recipe">
           Add a Recipe!
-        </Link>
+        </Button>
+        <FeedbackButton />
         {user?.isAdmin && (
-          <Link
-            href="/admin"
-            className="block bg-white shadow p-4 rounded hover:bg-gray-50 mb-4 transition-transform duration-100 active:scale-95"
-          >
+          <Button variant="whiteblock" href="/admin">
             Go To Admin Panel
-          </Link>
+          </Button>
         )}
       </div>
     </div>

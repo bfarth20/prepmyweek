@@ -26,6 +26,11 @@ interface AddRecipeFormProps {
   onShowToast: (message: string, type?: "success" | "error") => void;
 }
 
+interface ApiError {
+  message: string;
+  // optionally other fields like code, path, etc.
+}
+
 export default function AddRecipeForm({ onShowToast }: AddRecipeFormProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -62,7 +67,7 @@ export default function AddRecipeForm({ onShowToast }: AddRecipeFormProps) {
       }
     };
     fetchStores();
-  }, []);
+  }, [onShowToast]);
 
   const handleIngredientChange = (
     id: string,
@@ -179,7 +184,7 @@ export default function AddRecipeForm({ onShowToast }: AddRecipeFormProps) {
       if (!res.ok) {
         // Don't call res.json() again here; use the already parsed 'data'
         const errorMessages = Array.isArray(data.error)
-          ? data.error.map((err: any) => err.message).join(", ")
+          ? (data.error as ApiError[]).map((err) => err.message).join(", ")
           : data.error || "Failed to submit recipe";
 
         onShowToast(errorMessages, "error");

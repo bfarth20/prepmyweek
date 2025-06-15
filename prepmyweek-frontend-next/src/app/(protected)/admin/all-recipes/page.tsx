@@ -4,23 +4,15 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Link from "next/link";
 import API_BASE_URL from "@/lib/config";
+import { RecipeDetail } from "@/lib/types"; // adjust path as needed
 
-interface Recipe {
-  id: number;
-  title: string;
-  user: {
-    id: number;
-    name: string | null;
-    email: string;
-  };
-  course: string | null;
-  ingredients: any[]; // or define your Ingredient interface
-  status: string;
-  createdAt: string;
+// Extend RecipeDetail with a local ingredientCount field for UI
+interface RecipeWithCount extends RecipeDetail {
+  ingredientCount: number;
 }
 
 export default function AdminAllRecipesPage() {
-  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [recipes, setRecipes] = useState<RecipeWithCount[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
@@ -34,14 +26,15 @@ export default function AdminAllRecipesPage() {
             Authorization: `Bearer ${token}`,
           },
         });
-        const recipesWithCount: Recipe[] = response.data.map(
-          (recipe: Recipe) => ({
+        // Map to add ingredientCount locally from ingredients array length
+        const recipesWithCount: RecipeWithCount[] = response.data.map(
+          (recipe: RecipeDetail) => ({
             ...recipe,
-            ingredientCount: recipe.ingredients?.length ?? 0,
+            ingredientCount: recipe.ingredients.length,
           })
         );
         setRecipes(recipesWithCount);
-      } catch (err) {
+      } catch {
         setError("Failed to fetch recipes");
       } finally {
         setLoading(false);
@@ -104,7 +97,6 @@ export default function AdminAllRecipesPage() {
                     day: "numeric",
                   })}
                 </td>
-
                 <td className="border px-4 py-2">{recipe.course || "-"}</td>
                 <td className="border px-4 py-2">{recipe.ingredientCount}</td>
                 <td className="border px-4 py-2">{recipe.status}</td>

@@ -1,11 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { usePrep } from "@/components/context/PrepContext";
 import { useAuth } from "@/components/context/AuthContext";
 import { PrepTracker } from "@/components/ui/PrepTracker";
+import { Toast } from "@/components/ui/Toast";
 import { RecipeDetail, Recipe } from "@/lib/types";
 import API_BASE_URL from "@/lib/config";
 
@@ -18,13 +19,23 @@ export default function RecipeDetailClientPage({
   const { user } = useAuth();
   const router = useRouter();
 
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastType, setToastType] = useState<"success" | "error">("success");
+
+  const showToast = (
+    message: string,
+    type: "success" | "error" = "success"
+  ) => {
+    setToastMessage(message);
+    setToastType(type);
+  };
+
   useEffect(() => {
     if (!user) {
       router.push("/login");
     }
   }, [user, router]);
 
-  // Don't show anything until we confirm user is defined (avoids flicker)
   if (!user) return null;
 
   const recipeWithCount: Recipe = {
@@ -38,10 +49,49 @@ export default function RecipeDetailClientPage({
 
   const handleAddToPrep = () => {
     addDinner(recipeWithCount);
+    showToast("Recipe added to prep!", "success");
+  };
+
+  const handleApprove = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      await fetch(`${API_BASE_URL}/admin/recipes/${recipe.id}/approve`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      showToast("Recipe approved", "success");
+      router.refresh();
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to approve", "error");
+    }
+  };
+
+  const handleReject = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      await fetch(`${API_BASE_URL}/admin/recipes/${recipe.id}/reject`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      showToast("Recipe rejected and deleted", "success");
+      router.push("/admin/all-recipes");
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to reject", "error");
+    }
   };
 
   return (
     <main className="max-w-4xl mx-auto px-4 py-8 relative">
+      {toastMessage && (
+        <Toast
+          message={toastMessage}
+          type={toastType}
+          onClose={() => setToastMessage(null)}
+        />
+      )}
+
       <PrepTracker />
 
       <div className="rounded-lg p-4 shadow-2xl bg-white flex flex-col justify-between">
@@ -103,63 +153,32 @@ export default function RecipeDetailClientPage({
         >
           Add to Prep
         </button>
-        <button
-          onClick={handleEdit}
-          className="mt-4 w-full bg-teal-600 text-white rounded px-4 py-2 hover:bg-teal-700 transition"
-        >
-          Edit Recipe
-        </button>
+
+        {(user.isAdmin || user.id === recipe.userId) && (
+          <button
+            onClick={handleEdit}
+            className="mt-4 w-full bg-teal-600 text-white rounded px-4 py-2 hover:bg-teal-700 transition"
+          >
+            Edit Recipe
+          </button>
+        )}
+
         {user?.isAdmin && (
           <div className="mt-8 space-y-4">
             <h3 className="text-lg font-semibold">Admin Controls</h3>
             <p className="mt-4 text-sm text-gray-700">
               <strong>Recipe Status:</strong> {recipe.status}
             </p>
+
             <button
-              onClick={async () => {
-                try {
-                  const token = localStorage.getItem("token");
-                  await fetch(
-                    `${API_BASE_URL}/admin/recipes/${recipe.id}/approve`,
-                    {
-                      method: "PUT",
-                      headers: {
-                        Authorization: `Bearer ${token}`,
-                      },
-                    }
-                  );
-                  alert("Recipe approved");
-                  router.refresh(); // or update local state if needed
-                } catch (err) {
-                  console.error(err);
-                  alert("Failed to approve");
-                }
-              }}
+              onClick={handleApprove}
               className="w-full bg-green-600 text-white rounded px-4 py-2 hover:bg-green-700 transition"
             >
               Approve Recipe
             </button>
 
             <button
-              onClick={async () => {
-                try {
-                  const token = localStorage.getItem("token");
-                  await fetch(
-                    `${API_BASE_URL}/admin/recipes/${recipe.id}/reject`,
-                    {
-                      method: "DELETE",
-                      headers: {
-                        Authorization: `Bearer ${token}`,
-                      },
-                    }
-                  );
-                  alert("Recipe rejected and deleted");
-                  router.push("/admin/all-recipes");
-                } catch (err) {
-                  console.error(err);
-                  alert("Failed to reject");
-                }
-              }}
+              onClick={handleReject}
               className="w-full bg-red-600 text-white rounded px-4 py-2 hover:bg-red-700 transition"
             >
               Reject & Delete Recipe

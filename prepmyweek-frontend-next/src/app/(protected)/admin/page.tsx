@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/context/AuthContext";
-import Link from "next/link";
+import { Button } from "@/components/ui/Button";
 
 export default function AdminPage() {
   const { user, loading } = useAuth();
@@ -24,26 +24,20 @@ export default function AdminPage() {
       <h1 className="text-3xl font-bold mb-6">Admin Panel</h1>
 
       <div className="grid gap-4">
-        <Link
-          href="/admin/pending-recipes"
-          className="block bg-white shadow p-4 rounded hover:bg-gray-50"
-        >
+        <Button variant="whiteblock" href="/admin/pending-recipes">
           Manage Pending Recipes
-        </Link>
+        </Button>
 
-        <Link
-          href="/admin/all-recipes"
-          className="block bg-white shadow p-4 rounded hover:bg-gray-50"
-        >
+        <Button variant="whiteblock" href="/admin/all-recipes">
           Manage All Recipes
-        </Link>
+        </Button>
 
-        <Link
-          href="/admin/all-stores"
-          className="block bg-white shadow p-4 rounded hover:bg-gray-50"
-        >
+        <Button variant="whiteblock" href="/admin/all-stores">
           Manage Stores
-        </Link>
+        </Button>
+        <Button variant="whiteblock" href="/admin/all-feedback">
+          Manage Feedback
+        </Button>
       </div>
     </div>
   );

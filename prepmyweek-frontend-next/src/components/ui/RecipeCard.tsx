@@ -47,7 +47,7 @@ export default function RecipeCard({ recipe, onAddToPrep }: RecipeCardProps) {
 
       {onAddToPrep && (
         <Button
-          onClick={(e) => {
+          onClick={() => {
             onAddToPrep(recipe);
           }}
           className="transition-transform duration-100 active:scale-95 mt-2"

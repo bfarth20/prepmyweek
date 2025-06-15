@@ -8,6 +8,7 @@ import storesRouter from "./routes/stores.js";
 import currentPrepRouter from "./routes/currentPrep.js";
 import pastPrepRoutes from "./routes/pastpreps/index.js";
 import adminRoutes from "./routes/admin.js";
+import feedbackRoutes from "./routes/feedback.js";
 import { ZodError } from "zod";
 
 dotenv.config();
@@ -28,6 +29,7 @@ app.use("/api/stores", storesRouter);
 app.use("/api/current-prep", currentPrepRouter);
 app.use("/api/past-preps", pastPrepRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/feedback", feedbackRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err); // log error for debugging

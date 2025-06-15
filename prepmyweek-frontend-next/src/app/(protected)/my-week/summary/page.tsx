@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/context/AuthContext";
 import { usePrep } from "@/components/context/PrepContext";
 import RecipeCard from "@/components/ui/RecipeCard";
 import { Button } from "@/components/ui/Button";
+import { Toast } from "@/components/ui/Toast";
 import API_BASE_URL from "@/lib/config";
 import axios from "axios";
 
@@ -13,6 +14,17 @@ export default function WeekSummaryPage() {
   const { selectedDinners, selectedLunches } = usePrep();
   const { user, loading, token } = useAuth();
   const router = useRouter();
+
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastType, setToastType] = useState<"success" | "error">("success");
+
+  const showToast = (
+    message: string,
+    type: "success" | "error" = "success"
+  ) => {
+    setToastMessage(message);
+    setToastType(type);
+  };
 
   useEffect(() => {
     if (!loading && !user) {
@@ -33,7 +45,7 @@ export default function WeekSummaryPage() {
     );
 
     if (!token) {
-      alert("You must be logged in to save your prep.");
+      showToast("You must be logged in to save your prep.", "error");
       return;
     }
 
@@ -48,15 +60,16 @@ export default function WeekSummaryPage() {
           },
         }
       );
-      alert("CurrentPrep saved!");
+      showToast("CurrentPrep saved!", "success");
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
-        alert(
+        showToast(
           "Failed to save prep: " +
-            (error.response?.data?.error || error.message)
+            (error.response?.data?.error || error.message),
+          "error"
         );
       } else {
-        alert("An error occurred while saving your prep.");
+        showToast("An error occurred while saving your prep.", "error");
       }
       console.error("Error saving current prep:", error);
     }
@@ -64,6 +77,14 @@ export default function WeekSummaryPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+      {toastMessage && (
+        <Toast
+          message={toastMessage}
+          type={toastType}
+          onClose={() => setToastMessage(null)}
+        />
+      )}
+
       <h1 className="text-3xl font-bold text-brand font-brand">
         Your Week Summary
       </h1>

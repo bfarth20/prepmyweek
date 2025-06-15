@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import Image from "next/image";
 
@@ -25,16 +24,12 @@ export default function WelcomePage() {
           Plan smarter. Shop easier.
         </p>
         <div className="flex flex-row justify-center gap-4 mt-8">
-          <Link href="/login">
-            <Button>Log In</Button>
-          </Link>
-          <Link href="/signup">
-            <Button>Sign Up</Button>
-          </Link>
+          <Button href="/login">Log In</Button>
+          <Button href="/signup">Sign Up</Button>
         </div>
-        <Link href="/guest-view">
-          <Button variant="secondary">Continue as Guest</Button>
-        </Link>
+        <Button href="/guest-view" variant="secondary">
+          Continue as Guest
+        </Button>
       </div>
     </div>
   );

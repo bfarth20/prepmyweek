@@ -4,12 +4,24 @@ import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import API_BASE_URL from "@/lib/config";
-import { useAuth } from "@/components/context/AuthContext"; //<--needs axios
+import { useAuth } from "@/components/context/AuthContext";
+import { Toast } from "@/components/ui/Toast";
 
 export default function SaveToPastPrep({ recipeIds }: { recipeIds: number[] }) {
   const [showDialog, setShowDialog] = useState(false);
   const [name, setName] = useState("");
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastType, setToastType] = useState<"success" | "error">("success");
+
   const { token } = useAuth();
+
+  const showToast = (
+    message: string,
+    type: "success" | "error" = "success"
+  ) => {
+    setToastMessage(message);
+    setToastType(type);
+  };
 
   const handleSave = async () => {
     try {
@@ -24,18 +36,25 @@ export default function SaveToPastPrep({ recipeIds }: { recipeIds: number[] }) {
 
       if (!response.ok) throw new Error("Failed to save past prep");
 
-      // Optionally reset state / show toast / redirect
       setShowDialog(false);
       setName("");
-      alert("Prep saved!");
+      showToast("Prep saved!", "success");
     } catch (err) {
       console.error("Save error:", err);
-      alert("There was an error saving your prep.");
+      showToast("There was an error saving your prep.", "error");
     }
   };
 
   return (
     <>
+      {toastMessage && (
+        <Toast
+          message={toastMessage}
+          type={toastType}
+          onClose={() => setToastMessage(null)}
+        />
+      )}
+
       <div>
         <Button
           className="w-full sm:w-auto"

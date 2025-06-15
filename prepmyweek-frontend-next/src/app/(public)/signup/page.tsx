@@ -2,17 +2,30 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useAuth } from "@/components/context/AuthContext";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { Toast } from "@/components/ui/Toast";
 
 export default function SignupPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastType, setToastType] = useState<"success" | "error">("success");
+
   const { signup } = useAuth();
   const router = useRouter();
+
+  const showToast = (
+    message: string,
+    type: "success" | "error" = "success"
+  ) => {
+    setToastMessage(message);
+    setToastType(type);
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -21,14 +34,30 @@ export default function SignupPage() {
     if (success) {
       router.push("/home");
     } else {
-      alert("Signup failed, Please try again.");
+      showToast("Signup failed, please try again.", "error");
     }
   };
 
   return (
     <div className="min-h-screen bg-color-background flex flex-col items-center px-4">
+      {toastMessage && (
+        <Toast
+          message={toastMessage}
+          type={toastType}
+          onClose={() => setToastMessage(null)}
+        />
+      )}
+
       <div className="flex items-center gap-2 mb-8">
-        <img src="/logoNoBg.png" alt="PrepMyWeek Logo" className="w-20 h-20" />
+        <div className="relative w-20 h-20">
+          <Image
+            src="/logoNoBg.png"
+            alt="PrepMyWeek Logo"
+            fill
+            className="object-contain"
+            priority
+          />
+        </div>
         <h1 className="text-4xl font-bold font-brand text-brand">PrepMyWeek</h1>
       </div>
 

@@ -57,7 +57,7 @@ export default function Sidebar({
                 href="/stores"
                 className="block text-gray-700 hover:text-brand font-medium"
               >
-                Start a Fresh Prep
+                Start a FreshPrep
               </Link>
               <Link
                 href="/profile"

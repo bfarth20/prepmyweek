@@ -49,6 +49,13 @@ enum RecipeStatus {
   rejected
 }
 
+enum FeedbackType {
+  Bug
+  FeatureRequest
+  StoreRequest
+  Other
+}
+
 model User {
   id          Int          @id @default(autoincrement())
   email       String       @unique
@@ -58,6 +65,7 @@ model User {
   recipes     Recipe[]
   currentPrep CurrentPrep?
   pastPreps   PastPrep[]
+  feedbacks   Feedback[]
   createdAt   DateTime     @default(now())
 }
 
@@ -143,4 +151,13 @@ model PastPrepRecipe {
   recipe     Recipe   @relation(fields: [recipeId], references: [id])
 
   @@id([pastPrepId, recipeId])
+}
+
+model Feedback {
+  id        Int          @id @default(autoincrement())
+  user      User         @relation(fields: [userId], references: [id])
+  userId    Int
+  type      FeedbackType
+  message   String
+  createdAt DateTime     @default(now())
 }

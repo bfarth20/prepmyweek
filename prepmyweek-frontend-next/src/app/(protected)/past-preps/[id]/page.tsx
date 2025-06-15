@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import RecipeCard from "@/components/ui/RecipeCard";
 import API_BASE_URL from "@/lib/config";
@@ -10,10 +10,14 @@ import axios, { AxiosError } from "axios";
 
 export default function PastPrepDetailPage() {
   const { id } = useParams();
+  const router = useRouter();
+
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [prepName, setPrepName] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
 
   useEffect(() => {
     const fetchPastPrep = async () => {
@@ -49,6 +53,37 @@ export default function PastPrepDetailPage() {
     if (id) fetchPastPrep();
   }, [id]);
 
+  const handleDelete = async () => {
+    if (
+      !confirm(
+        "Are you sure you want to delete this past prep? This action cannot be undone."
+      )
+    )
+      return;
+
+    try {
+      setDeleteLoading(true);
+      setDeleteError("");
+
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("Not authenticated");
+
+      await axios.delete(`${API_BASE_URL}/past-preps/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // Redirect on success
+      router.push("/past-preps");
+    } catch (err) {
+      console.error("Delete failed:", err);
+      setDeleteError("Failed to delete past prep. Please try again.");
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
       <h1 className="text-3xl font-bold font-brand">
@@ -69,11 +104,23 @@ export default function PastPrepDetailPage() {
       </div>
 
       {!loading && !error && recipes.length > 0 && (
-        <div className="pt-8">
+        <div className="pt-8 flex flex-col sm:flex-row gap-4">
           <Button href={`/my-week/grocery-list?source=past&id=${id}`}>
             View Grocery List
           </Button>
+
+          <Button
+            variant="danger"
+            onClick={handleDelete}
+            disabled={deleteLoading}
+          >
+            {deleteLoading ? "Deleting..." : "Delete Past Prep"}
+          </Button>
         </div>
+      )}
+
+      {deleteError && (
+        <p className="text-red-600 mt-4 font-semibold">{deleteError}</p>
       )}
     </div>
   );

@@ -70,22 +70,23 @@ export function PrepTracker() {
 
   return (
     <div
-      className={`fixed top-4 right-4 z-50 bg-white/90 shadow-lg rounded-xl p-2 w-auto max-w-[280px] border text-xs space-y-1 mx-2 sm:mx-0 transition-all duration-300`}
+      className={`fixed top-4 right-4 z-50 bg-white/90 shadow-lg rounded-xl p-1 w-auto max-w-[220px] border text-xs space-y-0.5 mx-2 sm:mx-0 transition-all duration-300`}
     >
       {/* Header with minimize toggle */}
-      <div className="flex justify-between items-center mb-1">
+      <div className="flex justify-between items-center mb-0.5">
         {!minimized ? (
-          <h3 className="text-base font-semibold">Prep Progress</h3>
+          <h3 className="text-sm font-semibold leading-tight">Prep Progress</h3>
         ) : (
-          // Invisible placeholder with same width as the title to preserve space
-          <div className="invisible text-base font-semibold">Prep Progress</div>
+          <div className="invisible text-sm font-semibold leading-tight">
+            Prep Progress
+          </div>
         )}
         <button
           aria-label={
             minimized ? "Maximize prep progress" : "Minimize prep progress"
           }
           onClick={() => setMinimized(!minimized)}
-          className="text-sm font-bold px-2 py-1 hover:bg-gray-200 rounded"
+          className="text-xs font-bold px-1 py-0.5 hover:bg-gray-200 rounded"
         >
           {minimized ? "➕" : "➖"}
         </button>
@@ -94,14 +95,14 @@ export function PrepTracker() {
       {/* Conditionally render the status text */}
       {!minimized && (
         <>
-          <p className="leading-tight">
-            🍽️ {dinnerServingsSelected} / {totalDinnerServingsNeeded} dinners
+          <p className="leading-snug">
+            {dinnerServingsSelected} / {totalDinnerServingsNeeded} dinners
           </p>
-          <p className="leading-tight">
-            🥪 {totalLunchServingsCounted} / {totalLunchServingsNeeded} lunches
+          <p className="leading-snug">
+            {totalLunchServingsCounted} / {totalLunchServingsNeeded} lunches
           </p>
           {useLeftovers && (
-            <p className="text-[10px] text-gray-500 leading-tight">
+            <p className="text-[9px] text-gray-500 leading-snug">
               Includes {leftoverLunchServings} leftover lunches
             </p>
           )}
@@ -112,19 +113,22 @@ export function PrepTracker() {
       <Button
         onClick={handleResetPrep}
         variant="default"
-        className="w-full text-xs py-1 mt-1"
+        className="w-full text-xs py-0.5 mt-0.5"
       >
         Reset Prep
       </Button>
-      {prepComplete && (
-        <Button
-          onClick={handleGoToSummary}
-          variant="default"
-          className="w-full text-xs py-1 mt-1"
-        >
-          Finished Prep
-        </Button>
-      )}
+      <div className="w-full mt-0.5">
+        {prepComplete && (
+          <Button
+            onClick={handleGoToSummary}
+            variant="default"
+            className="w-full text-xs bg-green-600 py-0.5"
+          >
+            Finished Prep
+          </Button>
+        )}
+        <div />
+      </div>
     </div>
   );
 }
