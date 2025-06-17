@@ -9,6 +9,7 @@ import currentPrepRouter from "./routes/currentPrep.js";
 import pastPrepRoutes from "./routes/pastpreps/index.js";
 import adminRoutes from "./routes/admin.js";
 import feedbackRoutes from "./routes/feedback.js";
+import forgotPasswordRouter from "./routes/forgotPassword.js";
 import { ZodError } from "zod";
 
 dotenv.config();
@@ -18,7 +19,11 @@ const PORT = process.env.PORT || 3000;
 
 app.use(
   cors({
-    origin: ["https://prepmyweek.com", "https://www.prepmyweek.com"],
+    origin: [
+      "https://prepmyweek.com",
+      "https://www.prepmyweek.com",
+      "http://localhost:3001", // local dev frontend
+    ],
     credentials: true,
   })
 );
@@ -31,6 +36,7 @@ app.use("/api/current-prep", currentPrepRouter);
 app.use("/api/past-preps", pastPrepRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/feedback", feedbackRoutes);
+app.use("/api", forgotPasswordRouter);
 
 app.use((err, req, res, next) => {
   console.error(err); // log error for debugging

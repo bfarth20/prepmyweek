@@ -51,7 +51,10 @@ export const updateRecipe = async (req, res) => {
       where: { id: recipeId },
     });
 
-    if (!existing || existing.userId !== req.user.userId) {
+    if (
+      !existing ||
+      (existing.userId !== req.user.userId && !req.user.isAdmin)
+    ) {
       return sendResponse(res, 403, {
         error: "Unauthorized to edit this recipe",
       });

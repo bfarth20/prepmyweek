@@ -57,16 +57,17 @@ enum FeedbackType {
 }
 
 model User {
-  id          Int          @id @default(autoincrement())
-  email       String       @unique
-  name        String?
-  password    String
-  isAdmin     Boolean @default(false)
-  recipes     Recipe[]
-  currentPrep CurrentPrep?
-  pastPreps   PastPrep[]
-  feedbacks   Feedback[]
-  createdAt   DateTime     @default(now())
+  id                    Int                  @id @default(autoincrement())
+  email                 String               @unique
+  name                  String?
+  password              String
+  isAdmin               Boolean              @default(false)
+  recipes               Recipe[]
+  currentPrep           CurrentPrep?
+  pastPreps             PastPrep[]
+  feedbacks             Feedback[]
+  passwordResetTokens   PasswordResetToken[]
+  createdAt             DateTime             @default(now())
 }
 
 model Recipe {
@@ -160,4 +161,13 @@ model Feedback {
   type      FeedbackType
   message   String
   createdAt DateTime     @default(now())
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  createdAt DateTime @default(now())
+  expiresAt DateTime
 }

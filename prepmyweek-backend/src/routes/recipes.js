@@ -432,7 +432,13 @@ router.put("/:id", requireUser, async (req, res) => {
       where: { id: recipeId },
     });
 
-    if (!existing || existing.userId !== req.user.userId) {
+    console.log("User trying to edit:", req.user);
+    console.log("Recipe owner:", existing.userId);
+
+    if (
+      !existing ||
+      (existing.userId !== req.user.userId && !req.user.isAdmin)
+    ) {
       return sendResponse(res, 403, {
         error: "Unauthorized to edit this recipe",
       });
