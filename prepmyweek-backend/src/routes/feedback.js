@@ -23,7 +23,6 @@ router.post("/", requireUser, async (req, res) => {
 
   try {
     // Fetch full user from DB using some unique identifier from the JWT payload
-    // Assuming req.user.email exists — adjust if you have username or another field
     const user = await prisma.user.findUnique({
       where: { email: req.user.email },
     });

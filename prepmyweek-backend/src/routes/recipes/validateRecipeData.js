@@ -1,6 +1,7 @@
 /**
  * Utility to validate recipe data used in both create and update operations.
  * Ensures all required fields are present and properly formatted.
+ * THIS IS NO LONGER USED-I SWITCHED THE VALIDATION OVER TO ZOD
  */
 
 export function validateRecipeData(data) {

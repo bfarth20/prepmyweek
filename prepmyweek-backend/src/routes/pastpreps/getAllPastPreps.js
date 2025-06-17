@@ -17,7 +17,6 @@ export const getAllPastPreps = async (req, res) => {
                 imageUrl: true,
                 prepTime: true,
                 cookTime: true,
-                //totalTime: true,
               },
             },
           },
