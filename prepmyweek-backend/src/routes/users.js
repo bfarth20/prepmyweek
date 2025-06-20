@@ -2,10 +2,20 @@ import express from "express";
 import { prisma } from "../prismaClient.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { z } from "zod";
 import { requireUser } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 const SALT_ROUNDS = 10;
+
+// Zod schema for user signup
+const userSignupSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters long."),
+  email: z.string().email("Invalid email format."),
+  password: z.string().min(8, "Password must be at least 8 characters long."),
+  region: z.string().optional(),
+  preferredStore: z.string().optional(),
+});
 
 // Get all users
 router.get("/", async (req, res) => {
@@ -17,29 +27,20 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Create a new user
+// Create a new user with Zod validation
 router.post("/", async (req, res) => {
-  const { email, name, password } = req.body;
+  const parseResult = userSignupSchema.safeParse(req.body);
 
-  // Basic validation
-  if (!name || name.trim().length < 2) {
-    return res
-      .status(400)
-      .json({ error: "Name must be at least 2 characters long." });
+  if (!parseResult.success) {
+    const errorMessages = parseResult.error.issues.map(
+      (issue) => issue.message
+    );
+    return res.status(400).json({ error: errorMessages.join(" ") });
   }
 
-  if (!email || !/^[\w.-]+@[\w.-]+\.\w+$/.test(email)) {
-    return res.status(400).json({ error: "Invalid email format." });
-  }
-
-  if (!password || password.length < 8) {
-    return res
-      .status(400)
-      .json({ error: "Password must be at least 8 characters long." });
-  }
+  const { name, email, password, region, preferredStore } = parseResult.data;
 
   try {
-    // Check for existing email
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
       return res
@@ -54,12 +55,20 @@ router.post("/", async (req, res) => {
         email,
         name: name.trim(),
         password: hashedPassword,
+        region,
+        preferredStore,
       },
     });
 
     res.status(201).json({
       message: "User created successfully",
-      user: { id: newUser.id, email: newUser.email, name: newUser.name },
+      user: {
+        id: newUser.id,
+        email: newUser.email,
+        name: newUser.name,
+        region: newUser.region,
+        preferredStore: newUser.preferredStore,
+      },
     });
   } catch (error) {
     console.error("Error creating user:", error);
@@ -116,6 +125,8 @@ router.get("/me", requireUser, async (req, res) => {
         name: true,
         createdAt: true,
         isAdmin: true,
+        region: true,
+        preferredStore: true,
         //profileImageUrl: true,
         recipes: {
           select: {

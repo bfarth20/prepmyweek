@@ -41,6 +41,7 @@ enum Course {
   BREAKFAST
   LUNCH
   DINNER
+  SNACK_SIDE
 }
 
 enum RecipeStatus {
@@ -67,6 +68,8 @@ model User {
   pastPreps             PastPrep[]
   feedbacks             Feedback[]
   passwordResetTokens   PasswordResetToken[]
+  region                String?
+  preferredStore        String?
   createdAt             DateTime             @default(now())
 }
 

@@ -12,7 +12,7 @@ router.get("/", async (req, res) => {
       select: {
         id: true,
         name: true,
-        logoUrl: true, // optional, used in store cards
+        logoUrl: true,
       },
     });
     res.status(200).json({ data: stores });

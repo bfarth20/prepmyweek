@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const validCourses = ["BREAKFAST", "LUNCH", "DINNER"];
+const validCourses = ["BREAKFAST", "LUNCH", "DINNER", "SNACK_SIDE"];
 
 const ingredientSchema = z.object({
   name: z.string().min(2, "Ingredient name must be at least 2 characters"),

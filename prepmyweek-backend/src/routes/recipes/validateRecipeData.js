@@ -61,7 +61,7 @@ export function validateRecipeData(data) {
   }
 
   // Validate course if present
-  const validCourses = ["BREAKFAST", "LUNCH", "DINNER"];
+  const validCourses = ["BREAKFAST", "LUNCH", "DINNER", "SNACK_SIDE"];
   if (course && !validCourses.includes(course)) {
     return `Course must be one of: ${validCourses.join(", ")}`;
   }
