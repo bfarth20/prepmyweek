@@ -92,4 +92,15 @@ router.delete("/:id", requireUser, requireAdmin, async (req, res) => {
   }
 });
 
+// GET /admin/all-feedback/count
+router.get("/count", requireUser, requireAdmin, async (req, res) => {
+  try {
+    const count = await prisma.feedback.count();
+    res.json({ count });
+  } catch (err) {
+    console.error("Error fetching feedback count:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 export default router;

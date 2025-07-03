@@ -41,6 +41,7 @@ export interface RecipeDetail {
   ingredients: RecipeIngredient[];
   createdAt: string;
   stores: Store[];
+  isVegetarian: boolean;
 }
 
 export interface RecipeIngredient {
@@ -62,6 +63,8 @@ export interface RecipeSummary {
   ingredientCount: number | null;
   imageUrl?: string | null;
   course: string;
+  createdAt: string;
+  isVegetarian: boolean;
 }
 
 export type PastPrep = {
@@ -86,6 +89,8 @@ export type Recipe = {
   imageUrl?: string | null;
   ingredients?: SimpleIngredient[];
   course: string;
+  createdAt: string;
+  isVegetarian: boolean;
 };
 
 // New type for normalized ingredients stored in context state
@@ -109,6 +114,8 @@ export interface NormalizedRecipe {
   imageUrl?: string | null;
   ingredients: NormalizedIngredient[];
   course: string;
+  createdAt: string;
+  isVegetarian: boolean;
 }
 
 export type PrepConfig = {

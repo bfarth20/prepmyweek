@@ -53,9 +53,10 @@ router.get("/with-recipes", async (req, res) => {
 
 router.get("/:storeId/recipes", async (req, res) => {
   const storeId = parseInt(req.params.storeId);
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 20; // default 20 recipes per page
-  const skip = (page - 1) * limit;
+  const page = req.query.page ? parseInt(req.query.page) : undefined;
+  const limit = req.query.limit ? parseInt(req.query.limit) : undefined;
+
+  const skip = page && limit ? (page - 1) * limit : undefined;
 
   try {
     // Fetch total count for pagination
@@ -69,21 +70,52 @@ router.get("/:storeId/recipes", async (req, res) => {
     });
 
     // Fetch paginated recipes
-    const recipes = await prisma.recipe.findMany({
+    const queryOptions = {
       where: {
         status: "approved",
         recipeStores: {
           some: { storeId },
         },
       },
-      include: {
+      select: {
+        id: true,
+        title: true,
+        imageUrl: true,
+        prepTime: true,
+        cookTime: true,
+        servings: true,
+        course: true,
+        isVegetarian: true,
+        createdAt: true,
         ingredients: {
-          include: { ingredient: true },
+          select: {
+            ingredientId: true,
+            quantity: true,
+            unit: true,
+            storeSection: true,
+            isOptional: true,
+            ingredient: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
         },
       },
-      skip,
-      take: limit,
-    });
+      orderBy: {
+        createdAt: "desc",
+      },
+    };
+
+    // Add pagination params only if both skip and limit are numbers
+    if (typeof skip === "number" && typeof limit === "number") {
+      queryOptions.skip = skip;
+      queryOptions.take = limit;
+    }
+
+    // Execute query
+    const recipes = await prisma.recipe.findMany(queryOptions);
 
     const formatted = recipes.map((r) => ({
       id: r.id,
@@ -93,6 +125,8 @@ router.get("/:storeId/recipes", async (req, res) => {
       servings: r.servings,
       ingredientCount: r.ingredients.length,
       course: r.course,
+      isVegetarian: r.isVegetarian,
+      createdAt: r.createdAt,
       ingredients: r.ingredients.map((ri) => ({
         id: ri.ingredientId,
         name: ri.ingredient.name,

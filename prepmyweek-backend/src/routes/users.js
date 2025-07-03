@@ -142,6 +142,7 @@ router.get("/me", requireUser, async (req, res) => {
             prepTime: true,
             cookTime: true,
             status: true,
+            isVegetarian: true,
           },
         },
       },

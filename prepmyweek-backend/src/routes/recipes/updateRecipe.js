@@ -43,6 +43,7 @@ export const updateRecipe = async (req, res) => {
     storeIds = [],
     ingredients = [],
     imageUrl,
+    isVegetarian,
   } = validatedData;
 
   try {
@@ -72,6 +73,7 @@ export const updateRecipe = async (req, res) => {
         course,
         servings,
         imageUrl,
+        isVegetarian,
       },
     });
 

@@ -39,6 +39,7 @@ export const createRecipe = async (req, res) => {
     storeIds = [],
     ingredients = [],
     imageUrl,
+    isVegetarian = false,
   } = parsed;
 
   try {
@@ -53,6 +54,7 @@ export const createRecipe = async (req, res) => {
         course,
         servings,
         imageUrl,
+        isVegetarian,
         user: { connect: { id: userId } },
         status: "pending",
       },

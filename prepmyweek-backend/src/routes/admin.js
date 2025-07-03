@@ -78,6 +78,24 @@ router.get("/recipes/pending", requireUser, requireAdmin, async (req, res) => {
   }
 });
 
+// Get count of pending recipes
+router.get(
+  "/recipes/pending/count",
+  requireUser,
+  requireAdmin,
+  async (req, res) => {
+    try {
+      const count = await prisma.recipe.count({
+        where: { status: "pending" },
+      });
+      res.json({ count });
+    } catch (error) {
+      console.error("Failed to fetch pending recipes count", error);
+      res.status(500).json({ error: "Failed to fetch pending recipes count" });
+    }
+  }
+);
+
 // Approve a recipe
 router.put(
   "/recipes/:id/approve",

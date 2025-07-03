@@ -91,6 +91,7 @@ model Recipe {
   pastPreps    PastPrepRecipe[]
   status       RecipeStatus       @default(pending)
   createdAt    DateTime           @default(now())
+  isVegetarian Boolean            @default(false)
 }
 
 model Ingredient {

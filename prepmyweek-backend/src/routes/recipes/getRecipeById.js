@@ -58,6 +58,8 @@ export const getRecipeById = async (req, res) => {
       servings: recipe.servings,
       course: recipe.course,
       instructions: recipe.instructions,
+      isVegetarian: recipe.isVegetarian,
+      createdAt: recipe.createdAt,
       stores: recipe.recipeStores.map((rs) => ({
         id: rs.store.id,
         name: rs.store.name,

@@ -44,4 +44,5 @@ export const createRecipeSchema = z.object({
     })
     .optional(),
   imageUrl: z.string().optional(),
+  isVegetarian: z.boolean().optional(),
 });
