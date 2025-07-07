@@ -70,6 +70,7 @@ model User {
   passwordResetTokens   PasswordResetToken[]
   region                String?
   preferredStore        String?
+  walkthroughEnabled    Boolean              @default(true)
   createdAt             DateTime             @default(now())
 }
 

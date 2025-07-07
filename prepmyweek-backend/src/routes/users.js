@@ -132,7 +132,7 @@ router.get("/me", requireUser, async (req, res) => {
         isAdmin: true,
         region: true,
         preferredStore: true,
-        //profileImageUrl: true,
+        walkthroughEnabled: true,
         recipes: {
           select: {
             id: true,
@@ -154,6 +154,34 @@ router.get("/me", requireUser, async (req, res) => {
   } catch (error) {
     console.error("Error in /me route:", error);
     res.status(500).json({ error: "Failed to fetch user profile" });
+  }
+});
+
+//Update walkthroughEnabled setting for the current user
+router.put("/walkthrough", requireUser, async (req, res) => {
+  const { enabled } = req.body;
+
+  if (typeof enabled !== "boolean") {
+    return res.status(400).json({ error: "`enabled` must be a boolean." });
+  }
+
+  try {
+    const updatedUser = await prisma.user.update({
+      where: { id: req.user.userId },
+      data: { walkthroughEnabled: enabled },
+      select: {
+        id: true,
+        walkthroughEnabled: true,
+      },
+    });
+
+    res.json({
+      message: "Walkthrough setting updated",
+      walkthroughEnabled: updatedUser.walkthroughEnabled,
+    });
+  } catch (error) {
+    console.error("Error updating walkthroughEnabled:", error);
+    res.status(500).json({ error: "Failed to update walkthrough setting" });
   }
 });
 

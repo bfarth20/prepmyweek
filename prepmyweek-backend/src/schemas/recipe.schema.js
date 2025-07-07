@@ -19,24 +19,63 @@ export const createRecipeSchema = z.object({
     .optional(),
   instructions: z.string().min(5, "Instructions must be at least 5 characters"),
   prepTime: z
-    .number()
-    .min(0, "Prep time must be a non-negative number")
-    .optional(),
-  cookTime: z
-    .number()
-    .min(0, "Cook time must be a non-negative number")
-    .optional(),
-  servings: z
-    .number()
-    .positive("Servings must be a positive number")
-    .optional(),
-  course: z
-    .enum(validCourses, {
-      errorMap: () => ({
-        message: `Course must be one of: ${validCourses.join(", ")}`,
-      }),
+    .number({
+      required_error: "Prep time is required and can be zero",
+      invalid_type_error: "Prep time must be a number",
     })
-    .optional(),
+    .min(0, "Prep time cannot be negative"),
+
+  cookTime: z
+    .number({
+      required_error: "Cook time is required and can be zero",
+      invalid_type_error: "Cook time must be a number",
+    })
+    .min(0, "Cook time cannot be negative"),
+  servings: z
+    .union([z.string(), z.number(), z.null(), z.undefined()])
+    .transform((val) => {
+      if (val === null || val === undefined || val === "") return undefined;
+      return Number(val);
+    })
+    .superRefine((val, ctx) => {
+      if (val === undefined) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Servings is a required field",
+        });
+        return;
+      }
+      if (typeof val !== "number" || isNaN(val)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Servings must be a number",
+        });
+        return;
+      }
+      if (val <= 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Servings must be a positive number",
+        });
+      }
+    }),
+  course: z
+    .preprocess(
+      (val) => {
+        if (val === undefined || val === null || val === "") {
+          return undefined; // trigger required error later
+        }
+        return val;
+      },
+      z.enum(validCourses, {
+        errorMap: () => ({
+          message: `Course must be one of: ${validCourses.join(", ")}`,
+        }),
+      })
+    )
+    .refine((val) => val !== undefined, {
+      message: "Course is a required field",
+    }),
   storeIds: z.array(z.number().int()).optional(),
   ingredients: z
     .array(ingredientSchema, {
