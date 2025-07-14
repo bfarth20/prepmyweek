@@ -63,7 +63,7 @@ model User {
   name                  String?
   password              String
   isAdmin               Boolean              @default(false)
-  recipes               Recipe[]
+  recipes               Recipe[]             @relation("UserAuthoredRecipes")
   currentPrep           CurrentPrep?
   pastPreps             PastPrep[]
   feedbacks             Feedback[]
@@ -71,6 +71,7 @@ model User {
   region                String?
   preferredStore        String?
   walkthroughEnabled    Boolean              @default(true)
+  favoriteRecipes       Recipe[]             @relation("UserFavoriteRecipes")
   createdAt             DateTime             @default(now())
 }
 
@@ -85,7 +86,7 @@ model Recipe {
   description  String?
   instructions String
   imageUrl     String?
-  user         User               @relation(fields: [userId], references: [id])
+  user         User               @relation("UserAuthoredRecipes", fields: [userId], references: [id])
   userId       Int
   ingredients  RecipeIngredient[]
   recipeStores RecipeStore[]
@@ -93,6 +94,7 @@ model Recipe {
   status       RecipeStatus       @default(pending)
   createdAt    DateTime           @default(now())
   isVegetarian Boolean            @default(false)
+  favoritedBy  User[]             @relation("UserFavoriteRecipes")
 }
 
 model Ingredient {

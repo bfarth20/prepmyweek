@@ -185,4 +185,121 @@ router.put("/walkthrough", requireUser, async (req, res) => {
   }
 });
 
+// Get current user's favorite recipes
+router.get("/favorites", requireUser, async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.userId },
+      include: {
+        favoriteRecipes: {
+          include: {
+            recipeStores: {
+              include: {
+                store: {
+                  select: { id: true, name: true, logoUrl: true },
+                },
+              },
+            },
+            ingredients: {
+              include: {
+                ingredient: true,
+              },
+            },
+            user: {
+              select: { id: true, name: true, email: true },
+            },
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Map favoriteRecipes to match the formatted structure like getRecipeById
+    const formattedFavorites = user.favoriteRecipes.map((recipe) => {
+      return {
+        id: recipe.id,
+        title: recipe.title,
+        description: recipe.description,
+        imageUrl: recipe.imageUrl,
+        prepTime: recipe.prepTime,
+        cookTime: recipe.cookTime,
+        totalTime: (recipe.prepTime || 0) + (recipe.cookTime || 0),
+        servings: recipe.servings,
+        course: recipe.course,
+        instructions: recipe.instructions,
+        isVegetarian: recipe.isVegetarian,
+        createdAt: recipe.createdAt,
+        stores: recipe.recipeStores.map((rs) => ({
+          id: rs.store.id,
+          name: rs.store.name,
+          logoUrl: rs.store.logoUrl,
+        })),
+        user: recipe.user,
+        status: recipe.status,
+        ingredients: recipe.ingredients.map((ri) => ({
+          id: ri.ingredient.id,
+          recipeIngredientId: ri.id,
+          name: ri.ingredient.name,
+          quantity: ri.quantity,
+          unit: ri.unit,
+          storeSection: ri.storeSection,
+          isOptional: ri.isOptional,
+          preparation: ri.preparation,
+        })),
+        ingredientCount: recipe.ingredients.length,
+      };
+    });
+
+    return res.status(200).json(formattedFavorites);
+  } catch (error) {
+    console.error("Failed to fetch user favorites:", error);
+    return res.status(500).json({ error: "Failed to fetch user favorites" });
+  }
+});
+
+// Add a recipe to current user's favorites
+router.post("/favorites/:recipeId", requireUser, async (req, res) => {
+  const recipeId = parseInt(req.params.recipeId);
+
+  try {
+    await prisma.user.update({
+      where: { id: req.user.userId },
+      data: {
+        favoriteRecipes: {
+          connect: { id: recipeId },
+        },
+      },
+    });
+
+    res.status(204).end();
+  } catch (error) {
+    console.error("Error adding favorite:", error);
+    res.status(500).json({ error: "Failed to add recipe to favorites" });
+  }
+});
+
+// Remove a recipe from current user's favorites
+router.delete("/favorites/:recipeId", requireUser, async (req, res) => {
+  const recipeId = parseInt(req.params.recipeId);
+
+  try {
+    await prisma.user.update({
+      where: { id: req.user.userId },
+      data: {
+        favoriteRecipes: {
+          disconnect: { id: recipeId },
+        },
+      },
+    });
+
+    res.status(204).end();
+  } catch (error) {
+    console.error("Error removing favorite:", error);
+    res.status(500).json({ error: "Failed to remove recipe from favorites" });
+  }
+});
+
 export default router;
