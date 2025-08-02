@@ -7,6 +7,8 @@ import { Button } from "./ui/Button";
 import API_BASE_URL from "@/lib/config";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/context/AuthContext";
+import { ALLOWED_UNITS, ALLOWED_UNITS_METRIC } from "../lib/constants";
+import IngredientInput from "./IngredientInput";
 
 interface IngredientInput {
   id: string;
@@ -43,6 +45,8 @@ export default function AddRecipeForm({ onShowToast }: AddRecipeFormProps) {
   const [selectedStoreIds, setSelectedStoreIds] = useState<number[]>([]);
   const router = useRouter();
   const { user } = useAuth();
+  const preferMetric = user?.preferMetric ?? false;
+  const allowedUnits = preferMetric ? ALLOWED_UNITS_METRIC : ALLOWED_UNITS;
   const [isVegetarian, setIsVegetarian] = useState(false);
   const [ingredients, setIngredients] = useState<IngredientInput[]>([
     {
@@ -414,11 +418,10 @@ export default function AddRecipeForm({ onShowToast }: AddRecipeFormProps) {
               className="border border-orange-500 rounded-lg p-4 space-y-2"
             >
               <div className="grid grid-cols-2 gap-2">
-                <Input
-                  placeholder="Ingredient name"
+                <IngredientInput
                   value={ing.name}
-                  onChange={(e) =>
-                    handleIngredientChange(ing.id, "name", e.target.value)
+                  onChange={(newValue: string) =>
+                    handleIngredientChange(ing.id, "name", newValue)
                   }
                 />
                 <Input
@@ -437,13 +440,21 @@ export default function AddRecipeForm({ onShowToast }: AddRecipeFormProps) {
               </div>
 
               <div className="grid grid-cols-2 gap-2">
-                <Input
-                  placeholder="Unit (e.g., tsp, cups)"
+                <select
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
                   value={ing.unit}
                   onChange={(e) =>
                     handleIngredientChange(ing.id, "unit", e.target.value)
                   }
-                />
+                  required
+                >
+                  <option value="">Select a unit</option>
+                  {allowedUnits.map((unit) => (
+                    <option key={unit} value={unit}>
+                      {unit.charAt(0).toUpperCase() + unit.slice(1)}
+                    </option>
+                  ))}
+                </select>
                 <select
                   value={ing.storeSection}
                   onChange={(e) =>

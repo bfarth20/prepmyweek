@@ -1,3 +1,5 @@
+// I believe this is just a dead page, it is not imported anywhere
+
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import API_BASE_URL from "@/lib/config";
@@ -58,7 +60,11 @@ export default async function RecipeDetailPage({
           <ul className="list-disc list-inside mb-6 space-y-1">
             {recipe.ingredients.map((ingredient) => (
               <li key={ingredient.id}>
-                {ingredient.quantity ?? "?"} {ingredient.unit ?? ""}{" "}
+                {ingredient.formattedQuantity
+                  ? ingredient.formattedQuantity
+                  : `${ingredient.quantity ?? "?"} ${
+                      ingredient.unit ?? ""
+                    }`}{" "}
                 {ingredient.name}
                 {ingredient.isOptional && " (optional)"}
               </li>

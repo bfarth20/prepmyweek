@@ -4,6 +4,12 @@
  */
 
 import { prisma } from "../../prismaClient.js";
+import {
+  getUnitType,
+  convertTbspToBestUnit,
+  convertOzToBestUnit,
+  pluralizeUnit,
+} from "../../utils/unitConversions.js";
 
 // Helper to send consistent API responses with success flag and status code
 const sendResponse = (res, status, payload) => {
@@ -12,10 +18,28 @@ const sendResponse = (res, status, payload) => {
 };
 
 export const getRecipeById = async (req, res) => {
-  // Parse the recipe ID from the request parameters
   const recipeId = parseInt(req.params.id);
 
+  let preferMetric = false;
+
   try {
+    // Use preferMetric from query param if provided
+    if (req.query.preferMetric !== undefined) {
+      preferMetric = req.query.preferMetric === "true";
+    } else {
+      // Otherwise fallback to user preference from DB
+      const userId = req.user?.userId;
+      if (userId) {
+        const user = await prisma.user.findUnique({
+          where: { id: userId },
+          select: { preferMetric: true },
+        });
+        preferMetric = user?.preferMetric ?? false;
+      }
+    }
+
+    console.log("Effective preferMetric value:", preferMetric);
+
     // Fetch recipe from the database with full associations
     const recipe = await prisma.recipe.findUnique({
       where: { id: recipeId },
@@ -67,16 +91,53 @@ export const getRecipeById = async (req, res) => {
       })),
       user: recipe.user,
       status: recipe.status,
-      ingredients: recipe.ingredients.map((ri) => ({
-        id: ri.ingredient.id,
-        recipeIngredientId: ri.id,
-        name: ri.ingredient.name,
-        quantity: ri.quantity,
-        unit: ri.unit,
-        storeSection: ri.storeSection,
-        isOptional: ri.isOptional,
-        preparation: ri.preparation,
-      })),
+      ingredients: recipe.ingredients.map((ri) => {
+        const { id, name } = ri.ingredient;
+        const quantityForConversion = ri.normalizedQuantity ?? ri.quantity;
+        const unitForConversion = ri.normalizedUnit ?? ri.unit;
+
+        let displayQuantity = quantityForConversion;
+        let displayUnit = unitForConversion;
+
+        try {
+          const unitType = getUnitType(unitForConversion);
+          if (unitType === "volume") {
+            const converted = convertTbspToBestUnit(
+              quantityForConversion,
+              preferMetric
+            );
+            displayQuantity = converted.amount;
+            displayUnit = converted.unit;
+          } else if (unitType === "weight") {
+            const converted = convertOzToBestUnit(
+              quantityForConversion,
+              preferMetric
+            );
+            displayQuantity = converted.amount;
+            displayUnit = converted.unit;
+          }
+          // Count-based units remain unchanged
+        } catch (err) {
+          console.warn(`Conversion error for ingredient ${name}:`, err);
+        }
+
+        return {
+          id,
+          recipeIngredientId: ri.id,
+          name,
+          quantity: ri.quantity, // original quantity
+          unit: ri.unit, // original unit
+          displayQuantity,
+          displayUnit,
+          formattedQuantity:
+            displayQuantity && displayUnit
+              ? `${displayQuantity} ${pluralizeUnit(displayUnit, displayQuantity)}`
+              : null,
+          storeSection: ri.storeSection,
+          isOptional: ri.isOptional,
+          preparation: ri.preparation,
+        };
+      }),
     };
 
     sendResponse(res, 200, { data: formattedRecipe });

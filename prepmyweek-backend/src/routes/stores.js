@@ -53,30 +53,78 @@ router.get("/with-recipes", async (req, res) => {
 
 router.get("/:storeId/recipes", async (req, res) => {
   const storeId = parseInt(req.params.storeId);
-  const page = req.query.page ? parseInt(req.query.page) : undefined;
-  const limit = req.query.limit ? parseInt(req.query.limit) : undefined;
+  const page = req.query.page ? parseInt(req.query.page) : 1;
+  const limit = req.query.limit ? parseInt(req.query.limit) : 20;
+  const search = (req.query.search ?? "").toString();
+  const filter = (req.query.filter ?? "all").toString().toLowerCase();
+  const sort = (req.query.sort ?? "newest").toString().toLowerCase();
 
-  const skip = page && limit ? (page - 1) * limit : undefined;
+  const skip = (page - 1) * limit;
 
   try {
-    // Fetch total count for pagination
-    const totalCount = await prisma.recipe.count({
-      where: {
-        status: "approved",
-        recipeStores: {
-          some: { storeId },
-        },
+    // Build base where condition with store and status
+    const baseWhere = {
+      status: "approved",
+      recipeStores: {
+        some: { storeId },
       },
+    };
+
+    // Add search condition if search is non-empty
+    if (search) {
+      baseWhere.OR = [
+        {
+          title: {
+            contains: search,
+            mode: "insensitive",
+          },
+        },
+        {
+          instructions: {
+            contains: search,
+            mode: "insensitive",
+          },
+        },
+      ];
+    }
+
+    // Add filter condition
+    if (filter === "vegetarian") {
+      baseWhere.isVegetarian = true;
+    } else if (filter === "dinner") {
+      baseWhere.course = "DINNER";
+    } else if (filter === "lunch") {
+      baseWhere.course = "LUNCH";
+    } else if (filter === "breakfast") {
+      baseWhere.course = "BREAKFAST";
+    } else if (filter === "snack") {
+      baseWhere.course = "SNACK_SIDE";
+    }
+    // "all" means no additional filter
+
+    // Determine orderBy based on sort param
+    let orderBy;
+    if (sort === "ingredients") {
+      orderBy = { ingredients: { _count: "asc" } }; // sort by fewest ingredients
+    } else if (sort === "cooktime") {
+      // Sum of prepTime + cookTime to approximate total time sorting
+      orderBy = {
+        // Prisma does not support ordering by computed field, so order by cookTime ascending
+        cookTime: "asc",
+      };
+    } else {
+      // Default or "newest" — sort by createdAt descending
+      orderBy = { createdAt: "desc" };
+    }
+
+    // Get total count with filters for pagination
+    const totalCount = await prisma.recipe.count({
+      where: baseWhere,
     });
 
-    // Fetch paginated recipes
+    // Fetch paginated recipes with filters and sort
     const queryOptions = {
-      where: {
-        status: "approved",
-        recipeStores: {
-          some: { storeId },
-        },
-      },
+      where: baseWhere,
       select: {
         id: true,
         title: true,
@@ -103,20 +151,14 @@ router.get("/:storeId/recipes", async (req, res) => {
           },
         },
       },
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy,
+      skip,
+      take: limit,
     };
 
-    // Add pagination params only if both skip and limit are numbers
-    if (typeof skip === "number" && typeof limit === "number") {
-      queryOptions.skip = skip;
-      queryOptions.take = limit;
-    }
-
-    // Execute query
     const recipes = await prisma.recipe.findMany(queryOptions);
 
+    // Format the results
     const formatted = recipes.map((r) => ({
       id: r.id,
       title: r.title,

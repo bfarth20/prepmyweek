@@ -38,10 +38,20 @@ router.post("/", async (req, res) => {
     return res.status(400).json({ error: errorMessages.join(" ") });
   }
 
-  const { name, email, password, region, preferredStore } = parseResult.data;
+  let { name, email, password, region, preferredStore } = parseResult.data;
+
+  email = email.trim().toLowerCase();
 
   try {
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        email: {
+          equals: email,
+          mode: "insensitive",
+        },
+      },
+    });
+
     if (existingUser) {
       return res
         .status(409)
@@ -83,13 +93,20 @@ router.post("/", async (req, res) => {
 
 // User login
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+  let { email, password } = req.body;
 
   console.log("Login attempt:", req.body);
 
   try {
-    const user = await prisma.user.findUnique({
-      where: { email },
+    email = email.trim().toLowerCase();
+
+    const user = await prisma.user.findFirst({
+      where: {
+        email: {
+          equals: email,
+          mode: "insensitive",
+        },
+      },
     });
 
     if (!user) {
@@ -132,6 +149,7 @@ router.get("/me", requireUser, async (req, res) => {
         isAdmin: true,
         region: true,
         preferredStore: true,
+        preferMetric: true,
         walkthroughEnabled: true,
         recipes: {
           select: {
@@ -299,6 +317,167 @@ router.delete("/favorites/:recipeId", requireUser, async (req, res) => {
   } catch (error) {
     console.error("Error removing favorite:", error);
     res.status(500).json({ error: "Failed to remove recipe from favorites" });
+  }
+});
+
+//DELETE USER ROUTE
+
+router.delete("/delete-account", requireUser, async (req, res) => {
+  const userId = req.user.userId;
+
+  try {
+    // Delete current prep if it exists
+    await prisma.currentPrep.deleteMany({
+      where: { userId },
+    });
+
+    // Delete all past preps (and cascade delete their PastPrepRecipes)
+    await prisma.pastPrep.deleteMany({
+      where: { userId },
+    });
+
+    // Clear user's favorite recipes (many-to-many relation)
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        favoriteRecipes: {
+          set: [],
+        },
+      },
+    });
+
+    // Now delete the user
+    await prisma.user.delete({
+      where: { id: userId },
+    });
+
+    res
+      .status(200)
+      .json({ message: "Account and associated data deleted successfully." });
+  } catch (error) {
+    console.error("Error deleting user account:", error);
+    res.status(500).json({ error: "Failed to delete account." });
+  }
+});
+
+//Update user's preferred Store
+router.patch("/preferred-store", requireUser, async (req, res) => {
+  const { userId } = req.user;
+  const { preferredStore } = req.body;
+
+  if (!preferredStore || typeof preferredStore !== "string") {
+    return res.status(400).json({ error: "Invalid or missing store name." });
+  }
+
+  try {
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: { preferredStore },
+    });
+
+    res.status(200).json({
+      message: "Preferred store updated successfully",
+      user: {
+        id: updatedUser.id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        region: updatedUser.region,
+        preferredStore: updatedUser.preferredStore,
+      },
+    });
+  } catch (error) {
+    console.error("Error updating preferred store:", error);
+    res.status(500).json({ error: "Failed to update preferred store" });
+  }
+});
+
+//GET custom stores from user
+router.get("/custom-stores", requireUser, async (req, res) => {
+  console.log("GET /users/custom-stores called");
+  console.log("User ID from token:", req.user.userId);
+  try {
+    const userId = req.user.userId;
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { personalizedStoreNames: true },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    console.log("User personalized stores:", user.personalizedStoreNames);
+
+    res.json(user.personalizedStoreNames || []);
+  } catch (error) {
+    console.error("Failed to fetch personalized store names:", error);
+    res.status(500).json({ error: "Failed to fetch personalized store names" });
+  }
+});
+
+//Update the user's custom store names
+router.put("/custom-stores", requireUser, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { personalizedStoreNames } = req.body;
+
+    // Basic validation: must be an object
+    if (
+      !personalizedStoreNames ||
+      typeof personalizedStoreNames !== "object" ||
+      Array.isArray(personalizedStoreNames)
+    ) {
+      return res.status(400).json({
+        error:
+          "Invalid personalizedStoreNames: expected a JSON object mapping store IDs to names.",
+      });
+    }
+
+    // Update the user record with new personalized store names
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: { personalizedStoreNames },
+      select: { personalizedStoreNames: true },
+    });
+
+    res.json({ personalizedStoreNames: updatedUser.personalizedStoreNames });
+  } catch (error) {
+    console.error("Failed to update personalized store names:", error);
+    res
+      .status(500)
+      .json({ error: "Failed to update personalized store names" });
+  }
+});
+
+// PUT /users/preferMetric
+router.put("/preferMetric", requireUser, async (req, res) => {
+  const userId = req.user.id;
+  const { preferMetric } = req.body;
+
+  if (typeof preferMetric !== "boolean") {
+    return res.status(400).json({ error: "Invalid preferMetric value" });
+  }
+
+  try {
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: { preferMetric },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        preferMetric: true,
+        walkthroughEnabled: true,
+        isAdmin: true,
+        preferredStore: true,
+      },
+    });
+
+    res.json(updatedUser);
+  } catch (err) {
+    console.error("Error updating preferMetric:", err);
+    res.status(500).json({ error: "Failed to update user preference" });
   }
 });
 

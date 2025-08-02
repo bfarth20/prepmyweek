@@ -10,6 +10,8 @@ import pastPrepRoutes from "./routes/pastpreps/index.js";
 import adminRoutes from "./routes/admin.js";
 import feedbackRoutes from "./routes/feedback.js";
 import forgotPasswordRouter from "./routes/forgotPassword.js";
+import groceryListRoutes from "./routes/grocery-list.js";
+import ingredientRoutes from "./routes/ingredients.js";
 import { ZodError } from "zod";
 
 dotenv.config();
@@ -37,6 +39,8 @@ app.use("/api/past-preps", pastPrepRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/feedback", feedbackRoutes);
 app.use("/api", forgotPasswordRouter);
+app.use("/api/grocery-list", groceryListRoutes);
+app.use("/api/ingredients", ingredientRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err); // log error for debugging

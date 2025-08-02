@@ -58,21 +58,23 @@ enum FeedbackType {
 }
 
 model User {
-  id                    Int                  @id @default(autoincrement())
-  email                 String               @unique
-  name                  String?
-  password              String
-  isAdmin               Boolean              @default(false)
-  recipes               Recipe[]             @relation("UserAuthoredRecipes")
-  currentPrep           CurrentPrep?
-  pastPreps             PastPrep[]
-  feedbacks             Feedback[]
-  passwordResetTokens   PasswordResetToken[]
-  region                String?
-  preferredStore        String?
-  walkthroughEnabled    Boolean              @default(true)
-  favoriteRecipes       Recipe[]             @relation("UserFavoriteRecipes")
-  createdAt             DateTime             @default(now())
+  id                     Int                  @id @default(autoincrement())
+  email                  String               @unique
+  name                   String?
+  password               String
+  isAdmin                Boolean              @default(false)
+  recipes                Recipe[]             @relation("UserAuthoredRecipes")
+  currentPrep            CurrentPrep?
+  pastPreps              PastPrep[]
+  feedbacks              Feedback[]
+  passwordResetTokens    PasswordResetToken[]
+  region                 String?
+  preferredStore         String?
+  walkthroughEnabled     Boolean              @default(true)
+  favoriteRecipes        Recipe[]             @relation("UserFavoriteRecipes")
+  personalizedStoreNames Json?
+  preferMetric           Boolean              @default(false)
+  createdAt              DateTime             @default(now())
 }
 
 model Recipe {
@@ -105,16 +107,18 @@ model Ingredient {
 }
 
 model RecipeIngredient {
-  id           Int           @id @default(autoincrement())
-  recipeId     Int
-  ingredientId Int
-  quantity     Float
-  unit         String?
-  storeSection StoreSection?
-  isOptional   Boolean       @default(false)
-  preparation  String?
-  recipe       Recipe        @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  ingredient   Ingredient    @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+  id                 Int           @id @default(autoincrement())
+  recipeId           Int
+  ingredientId       Int
+  quantity           Float
+  unit               String?
+  normalizedQuantity Float?      
+  normalizedUnit     String? 
+  storeSection       StoreSection?
+  isOptional         Boolean       @default(false)
+  preparation        String?
+  recipe             Recipe        @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  ingredient         Ingredient    @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
 }
 
 model GroceryStore {

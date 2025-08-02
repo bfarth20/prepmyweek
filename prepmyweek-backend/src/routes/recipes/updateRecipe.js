@@ -5,6 +5,11 @@
 
 import { prisma } from "../../prismaClient.js";
 import { createRecipeSchema } from "../../schemas/recipe.schema.js";
+import {
+  getUnitType,
+  convertVolumeToTbsp,
+  convertWeightToOz,
+} from "../../utils/unitConversions.js";
 import { z } from "zod";
 
 // Helper function to send a consistent JSON response
@@ -125,6 +130,30 @@ export const updateRecipe = async (req, res) => {
         });
       }
 
+      // Normalize units and quantities (same as createRecipe)
+      const unitType = getUnitType(ing.unit);
+      let normalizedQuantity = ing.quantity;
+      let normalizedUnit = ing.unit?.toLowerCase() || null;
+
+      try {
+        if (unitType === "volume") {
+          normalizedQuantity = convertVolumeToTbsp(
+            ing.quantity,
+            normalizedUnit
+          );
+          normalizedUnit = "tbsp";
+        } else if (unitType === "weight") {
+          normalizedQuantity = convertWeightToOz(ing.quantity, normalizedUnit);
+          normalizedUnit = "oz";
+        }
+        // count units or unknown units: keep as is
+      } catch (error) {
+        console.warn(
+          `Unit conversion failed for ingredient "${ing.name}":`,
+          error
+        );
+      }
+
       if (ing.recipeIngredientId) {
         // Update existing ingredient and its link
         await prisma.recipeIngredient.update({
@@ -132,6 +161,8 @@ export const updateRecipe = async (req, res) => {
           data: {
             quantity: ing.quantity,
             unit: ing.unit,
+            normalizedQuantity,
+            normalizedUnit,
             storeSection: ing.storeSection,
             isOptional: ing.isOptional,
             preparation: ing.preparation || null,
@@ -161,6 +192,8 @@ export const updateRecipe = async (req, res) => {
             ingredientId: ingredient.id,
             quantity: ing.quantity,
             unit: ing.unit || null,
+            normalizedQuantity,
+            normalizedUnit,
             storeSection: ing.storeSection || null,
             isOptional: ing.isOptional || false,
             preparation: ing.preparation || null,

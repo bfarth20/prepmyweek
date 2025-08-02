@@ -6,6 +6,11 @@
 import { prisma } from "../../prismaClient.js";
 import { createRecipeSchema } from "../../schemas/recipe.schema.js";
 import { z } from "zod";
+import {
+  getUnitType,
+  convertVolumeToTbsp,
+  convertWeightToOz,
+} from "../../utils/unitConversions.js";
 
 const sendResponse = (res, status, payload) => {
   const success = status < 400;
@@ -71,6 +76,31 @@ export const createRecipe = async (req, res) => {
     for (const ing of ingredients) {
       const normalizedName = ing.name.trim().toLowerCase().replace(/[’]/g, "'");
 
+      // Normalize units and quantities
+      const unitType = getUnitType(ing.unit);
+      let normalizedQuantity = ing.quantity;
+      let normalizedUnit = ing.unit?.toLowerCase() || null;
+
+      try {
+        if (unitType === "volume") {
+          normalizedQuantity = convertVolumeToTbsp(
+            ing.quantity,
+            normalizedUnit
+          );
+          normalizedUnit = "tbsp";
+        } else if (unitType === "weight") {
+          normalizedQuantity = convertWeightToOz(ing.quantity, normalizedUnit);
+          normalizedUnit = "oz";
+        }
+        // count units or unknown units: keep as-is
+      } catch (error) {
+        console.warn(
+          `Unit conversion failed for ingredient "${ing.name}":`,
+          error
+        );
+        // optionally, reject recipe creation or fallback to original values
+      }
+
       let ingredient = await prisma.ingredient.findUnique({
         where: { name: normalizedName },
       });
@@ -88,7 +118,9 @@ export const createRecipe = async (req, res) => {
           recipeId: recipe.id,
           ingredientId: ingredient.id,
           quantity: ing.quantity,
-          unit: ing.unit || null,
+          unit: ing.unit,
+          normalizedQuantity,
+          normalizedUnit,
           storeSection: ing.storeSection || null,
           isOptional: ing.isOptional || false,
           preparation: ing.preparation || null,

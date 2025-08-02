@@ -1,0 +1,7 @@
+npm error code ENOTEMPTY
+npm error syscall rename
+npm error path /Users/benjaminfarthing/Documents/code/prepmyweek/prepmyweek-mobile/node_modules/expo 2
+npm error dest /Users/benjaminfarthing/Documents/code/prepmyweek/prepmyweek-mobile/node_modules/.expo 2-HyFgn6lQ
+npm error errno -66
+npm error ENOTEMPTY: directory not empty, rename '/Users/benjaminfarthing/Documents/code/prepmyweek/prepmyweek-mobile/node_modules/expo 2' -> '/Users/benjaminfarthing/Documents/code/prepmyweek/prepmyweek-mobile/node_modules/.expo 2-HyFgn6lQ'
+npm error A complete log of this run can be found in: /Users/benjaminfarthing/.npm/_logs/2025-07-18T01_52_22_088Z-debug-0.log

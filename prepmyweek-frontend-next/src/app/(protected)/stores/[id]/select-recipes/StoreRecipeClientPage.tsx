@@ -28,17 +28,15 @@ export default function StoreRecipeClientPage({
   const { user, loading } = useAuth();
   const router = useRouter();
   const {
-    selectedDinners,
-    selectedLunches,
+    selectedRecipes,
     addDinner,
     removeDinner,
     addLunch,
     removeLunch,
+    addRecipe,
+    removeRecipe,
   } = usePrep();
-  const selectedRecipeIds = [
-    ...selectedDinners.map((r) => r.id),
-    ...selectedLunches.map((r) => r.id),
-  ];
+  const selectedIds = selectedRecipes.map((r) => r.id);
 
   // Pagination state
   const [recipes, setRecipes] = useState<RecipeSummary[]>([]);
@@ -56,6 +54,16 @@ export default function StoreRecipeClientPage({
   type FilterOption = "all" | "dinner" | "lunch" | "vegetarian";
   const [filter, setFilter] = useState<FilterOption>("all");
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm.trim());
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
   useEffect(() => {
     if (!loading && !user) {
       router.push("/login");
@@ -69,7 +77,17 @@ export default function StoreRecipeClientPage({
       setLoadingRecipes(true);
       setError(null);
       try {
-        const res = await fetch(`${API_BASE_URL}/stores/${storeId}/recipes`);
+        const queryParams = new URLSearchParams({
+          page: page.toString(),
+          limit: limit.toString(),
+          sort: sortOption,
+          filter,
+          search: debouncedSearchTerm,
+        });
+
+        const res = await fetch(
+          `${API_BASE_URL}/stores/${storeId}/recipes?${queryParams}`
+        );
         if (!res.ok) {
           throw new Error("Failed to fetch recipes");
         }
@@ -88,7 +106,7 @@ export default function StoreRecipeClientPage({
     }
 
     fetchRecipes();
-  }, [storeId, page, limit, user]);
+  }, [storeId, page, limit, user, filter, sortOption, debouncedSearchTerm]);
 
   useEffect(() => {
     if (!user) return;
@@ -111,16 +129,24 @@ export default function StoreRecipeClientPage({
     fetchFavorites();
   }, [user]);
 
-  const handleAddToPrep = (recipe: RecipeSummary) => {
-    const isSelected = selectedRecipeIds.includes(recipe.id);
+  const handleAddOrRemove = (recipe: RecipeSummary) => {
+    const isSelected = selectedRecipes.some((r) => r.id === recipe.id);
 
+    // Always update the general selectedRecipes list
+    if (isSelected) {
+      removeRecipe(recipe.id);
+    } else {
+      addRecipe(recipe);
+    }
+
+    // Update PrepTracker state only for Lunch and Dinner courses
     if (recipe.course === "LUNCH") {
       if (isSelected) {
         removeLunch(recipe.id);
       } else {
         addLunch(recipe);
       }
-    } else {
+    } else if (recipe.course === "DINNER") {
       if (isSelected) {
         removeDinner(recipe.id);
       } else {
@@ -131,38 +157,6 @@ export default function StoreRecipeClientPage({
 
   const handlePrevPage = () => setPage((p) => Math.max(p - 1, 1));
   const handleNextPage = () => setPage((p) => Math.min(p + 1, totalPages));
-
-  const filteredRecipes = recipes.filter((recipe) => {
-    if (filter === "all") return true;
-    if (filter === "vegetarian") return recipe.isVegetarian;
-    if (filter === "dinner") return recipe.course === "DINNER";
-    if (filter === "lunch") return recipe.course === "LUNCH";
-    return true;
-  });
-
-  const sortedRecipes = filteredRecipes.sort((a, b) => {
-    if (sortOption === "newest") {
-      const toDate = (dateStr?: string) =>
-        dateStr ? new Date(dateStr.replace(" ", "T")) : new Date(0);
-
-      return toDate(b.createdAt).getTime() - toDate(a.createdAt).getTime();
-    }
-    if (sortOption === "ingredients") {
-      return (a.ingredientCount ?? 0) - (b.ingredientCount ?? 0);
-    }
-    if (sortOption === "cookTime") {
-      return (a.totalTime ?? 0) - (b.totalTime ?? 0);
-    }
-    return 0;
-  });
-
-  const startIndex = (page - 1) * limit;
-  const paginatedRecipes = sortedRecipes.slice(startIndex, startIndex + limit);
-
-  // Update totalPages to match filtered count
-  useEffect(() => {
-    setTotalPages(Math.ceil(filteredRecipes.length / limit));
-  }, [filteredRecipes, limit]);
 
   if (loading || !user) return null;
 
@@ -175,6 +169,17 @@ export default function StoreRecipeClientPage({
         <h1 className="text-2xl text-brand font-brand font-bold mb-6">
           Recipes from This Store
         </h1>
+
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setPage(1); // reset to page 1 on new search
+          }}
+          placeholder="Search recipes by name or instructions..."
+          className="w-full p-2 mb-6 border border-gray-300 bg-white rounded shadow-sm"
+        />
 
         {error && <p className="text-red-500 mb-4">{error}</p>}
 
@@ -198,6 +203,8 @@ export default function StoreRecipeClientPage({
                 <option value="all">No Filter</option>
                 <option value="dinner">Dinner</option>
                 <option value="lunch">Lunch</option>
+                <option value="breakfast">Breakfast</option>
+                <option value="snack">Snack or Side</option>
                 <option value="vegetarian">Vegetarian</option>
               </select>
 
@@ -217,13 +224,13 @@ export default function StoreRecipeClientPage({
               </select>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
-              {paginatedRecipes.map((recipe) => (
+              {recipes.map((recipe) => (
                 <RecipeCard
                   key={recipe.id}
                   recipe={recipe}
-                  isSelected={selectedRecipeIds.includes(recipe.id)}
+                  isSelected={selectedIds.includes(recipe.id)}
                   isFavorited={favoriteIds.includes(recipe.id)}
-                  onAddToPrep={handleAddToPrep}
+                  onAddToPrep={handleAddOrRemove}
                   onToggleFavorite={async () => {
                     try {
                       const method = favoriteIds.includes(recipe.id)

@@ -1,0 +1,122 @@
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+  isAdmin: boolean;
+  region: string;
+  preferredStore: string;
+}
+
+export interface Store {
+  id: number;
+  name: string;
+  logoUrl?: string | null;
+}
+
+export interface SimpleIngredient {
+  name: string;
+  quantity: number;
+  unit: string;
+  storeSection?: string | null;
+  id: number;
+}
+
+export interface NormalizedIngredient {
+  id: number;
+  name: string;
+  quantity: number | null;
+  unit: string | null;
+  storeSection: string | null;
+  optional: boolean;
+  preparation?: string | null;
+}
+
+export interface Recipe {
+  id: number;
+  title: string;
+  totalTime: number | null;
+  servings: number | null;
+  ingredientCount: number | null;
+  imageUrl?: string | null;
+  ingredients?: SimpleIngredient[];
+  course: string;
+  createdAt: string;
+  isVegetarian: boolean;
+}
+
+export interface NormalizedRecipe {
+  id: number;
+  title: string;
+  totalTime: number | null;
+  servings: number | null;
+  ingredientCount: number | null;
+  imageUrl?: string | null;
+  ingredients: NormalizedIngredient[];
+  course: string;
+  createdAt: string;
+  isVegetarian: boolean;
+  showPrepTracker?: boolean;
+}
+
+export type PrepConfig = {
+  numPeople: number;
+  numLunches: number;
+  numDinners: number;
+  useLeftovers: boolean;
+};
+
+export interface RecipeSummary {
+  id: number;
+  title: string;
+  totalTime: number | null;
+  servings: number | null;
+  ingredientCount: number | null;
+  imageUrl?: string | null;
+  course: string;
+  createdAt: string;
+  isVegetarian: boolean;
+}
+
+export interface RecipeDetail {
+  id: number;
+  title: string;
+  description: string;
+  imageUrl?: string | null;
+  prepTime: number;
+  cookTime: number;
+  totalTime: number;
+  ingredientCount: number | null;
+  servings: number;
+  course: string;
+  instructions: string;
+  user: User;
+  userId: number;
+  status: "pending" | "approved" | "rejected";
+  ingredients: RecipeIngredient[];
+  createdAt: string;
+  stores: Store[];
+  isVegetarian: boolean;
+}
+
+export interface RecipeIngredient {
+  id: number; // probably the auto-incremented primary key in DB
+  recipeIngredientId: number; // used in your form as a unique identifier
+  name: string;
+  quantity: number;
+  unit: string;
+  storeSection: string;
+  isOptional: boolean;
+  preparation?: string | null;
+  isNew?: boolean;
+}
+
+export interface Ingredient {
+  id: number;
+  recipeIngredientId?: number;
+  name: string;
+  quantity: number | null;
+  unit: string | null;
+  storeSection: string | null;
+  optional: boolean;
+  preparation?: string | null;
+}
