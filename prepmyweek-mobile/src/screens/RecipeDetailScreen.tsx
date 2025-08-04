@@ -43,7 +43,16 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
   useEffect(() => {
     const fetchRecipe = async () => {
       try {
-        const res = await axios.get(`${API_BASE_URL}/recipes/${recipeId}`);
+        const res = await axios.get(
+          `${API_BASE_URL}/recipes/${recipeId}?preferMetric=${
+            user?.preferMetric ?? false
+          }`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
         setRecipe(res.data.data ?? res.data);
       } catch (err: any) {
         setError(err.message || "Failed to load recipe");
@@ -130,7 +139,10 @@ export default function RecipeDetailScreen({ route, navigation }: Props) {
           <Text style={styles.sectionTitle}>Ingredients</Text>
           {recipe.ingredients.map((ing) => (
             <Text key={ing.id} style={styles.ingredientText}>
-              • {ing.quantity ?? "?"} {ing.unit ?? ""} {ing.name}
+              •{" "}
+              {ing.formattedQuantity ??
+                `${ing.quantity ?? "?"} ${ing.unit ?? ""}`}{" "}
+              {ing.name}
               {ing.preparation ? `, ${ing.preparation}` : ""}
               {ing.isOptional ? " (optional)" : ""}
             </Text>

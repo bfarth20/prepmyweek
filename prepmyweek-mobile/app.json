@@ -3,7 +3,7 @@
     "name": "PrepMyWeek",
     "slug": "prepmyweek",
     "scheme": "prepmyweek",
-    "version": "1.0.8",
+    "version": "1.0.9",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -16,10 +16,10 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.prepmyweek.app",
-      "buildNumber": "7"
+      "buildNumber": "8"
     },
     "android": {
-      "versionCode": 7,
+      "versionCode": 8,
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#d9f9fa"

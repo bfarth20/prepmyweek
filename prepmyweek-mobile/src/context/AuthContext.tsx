@@ -17,6 +17,7 @@ interface User {
   region: string;
   preferredStore: string;
   walkthroughEnabled: boolean;
+  preferMetric: boolean;
 }
 
 interface AuthContextType {

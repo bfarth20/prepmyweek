@@ -65,13 +65,15 @@ export function aggregateIngredients(recipes, options = {}) {
       }
 
       const sectionMap = grouped.get(storeSection);
-      const key = `${name}-${rawUnit}`;
+      const id = ingredient.ingredient?.id ?? ingredient.id ?? "unknown";
+      const key = `${id}-${rawUnit}`;
 
       if (sectionMap.has(key)) {
         const existing = sectionMap.get(key);
         existing.normalizedQuantity += Number(quantity);
       } else {
         sectionMap.set(key, {
+          id,
           name,
           normalizedQuantity: quantity,
           rawUnit,
@@ -117,6 +119,7 @@ export function aggregateIngredients(recipes, options = {}) {
       const pluralUnit = pluralizeUnit(displayUnit, displayQuantity);
 
       arr.push({
+        id: ingredient.id,
         name,
         storeSection,
         quantity: displayQuantity,

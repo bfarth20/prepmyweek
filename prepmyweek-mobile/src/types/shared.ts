@@ -5,6 +5,7 @@ export interface User {
   isAdmin: boolean;
   region: string;
   preferredStore: string;
+  preferMetric: boolean;
 }
 
 export interface Store {
@@ -108,6 +109,7 @@ export interface RecipeIngredient {
   isOptional: boolean;
   preparation?: string | null;
   isNew?: boolean;
+  formattedQuantity: string;
 }
 
 export interface Ingredient {

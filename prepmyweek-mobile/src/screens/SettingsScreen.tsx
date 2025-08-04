@@ -18,6 +18,7 @@ import { colors } from "../theme/colors";
 export default function SettingsScreen() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const { user, setUser, logout, token } = useAuth();
+  const preferMetric = user?.preferMetric ?? false;
 
   const walkthroughEnabled = user?.walkthroughEnabled ?? true;
 
@@ -38,6 +39,26 @@ export default function SettingsScreen() {
     } catch (error) {
       console.error("Failed to update walkthrough setting:", error);
       Alert.alert("Error", "Failed to update walkthrough setting.");
+    }
+  };
+
+  const handleToggleMetric = async (value: boolean) => {
+    try {
+      await axios.put(
+        `${API_BASE_URL}/users/preferMetric`,
+        { preferMetric: value },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Update user in context
+      setUser((prev) => (prev ? { ...prev, preferMetric: value } : prev));
+    } catch (error) {
+      console.error("Failed to update metric preference:", error);
+      Alert.alert("Error", "Failed to update metric preference.");
     }
   };
 
@@ -115,6 +136,13 @@ export default function SettingsScreen() {
                 <Switch
                   value={walkthroughEnabled}
                   onValueChange={handleToggleWalkthrough}
+                />
+              </View>
+              <View style={styles.row}>
+                <Text style={styles.label}>Use Metric Units</Text>
+                <Switch
+                  value={preferMetric}
+                  onValueChange={handleToggleMetric}
                 />
               </View>
 

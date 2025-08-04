@@ -50,6 +50,10 @@ router.post("/", async (req, res) => {
     const groceryList = aggregateIngredients(recipes, { preferMetric });
     const groceryListObj = Object.fromEntries(groceryList);
 
+    console.log(
+      "Aggregated grocery list:",
+      JSON.stringify(groceryListObj, null, 2)
+    );
     res.json({ groceryList: groceryListObj });
   } catch (error) {
     console.error("Error generating grocery list:", error);
