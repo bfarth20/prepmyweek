@@ -27,15 +27,16 @@ Frontend Web Version: [prepmyweek-frontend-next](../prepmyweek-frontend-next)
 
 ### 1. Install dependencies
 
-````bash
+```bash
 cd prepmyweek-mobile
 npm install
+```
 
-###2. Start the dev server
+### 2. Start the dev server
 
 ```bash
 npx expo start
-````
+```
 
 Open in:
 -iOS simulator: npm run ios
@@ -88,6 +89,8 @@ The app’s navigation uses React Navigation with nested navigators for a smooth
 -SettingsMain — Main settings screen
 -ReportBug — Submit feedback/bug report screen
 -PersonalizeStores — Customize store names screen
+
+---
 
 ### Fonts
 
@@ -159,16 +162,16 @@ Builds are managed via EAS, not the classic expo build flow.
 ```bash
 prepmyweek-mobile/
 ├── assets/               # Fonts, images, icons
-├── src/components/          # Shared UI components
-├── src/context/             # Auth provider, API context
-├── src/navigation/              # React Navigation setup and stacks
-├── src/screens/               # Screen components for app views
-├── src/theme/              # Colors, fonts, and styling constants
-├── src/types/         # TypeScript type definitions
-├── src/utils/         # Utility functions and helpers
-├── app.json             # Expo configuration file.
-├── App.tsx              # Main entry point of the React Native app, wraps navigation and context providers.
-├── eas.json             # Expo Application Services build configuration.
+├── src/components/       # Shared UI components
+├── src/context/          # Auth provider, API context
+├── src/navigation/       # React Navigation setup and stacks
+├── src/screens/          # Screen components for app views
+├── src/theme/            # Colors, fonts, and styling constants
+├── src/types/            # TypeScript type definitions
+├── src/utils/            # Utility functions and helpers
+├── app.json              # Expo configuration file.
+├── App.tsx               # Main entry point of the React Native app, wraps navigation and context providers.
+├── eas.json              # Expo Application Services build configuration.
 ├── index.ts              # Entry file
 └── README.md             # You are here
 ```
