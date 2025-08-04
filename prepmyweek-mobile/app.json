@@ -16,7 +16,10 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.prepmyweek.app",
-      "buildNumber": "8"
+      "buildNumber": "8",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "versionCode": 8,
@@ -30,7 +33,10 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": ["expo-secure-store", "expo-font"],
+    "plugins": [
+      "expo-secure-store",
+      "expo-font"
+    ],
     "extra": {
       "eas": {
         "projectId": "696972c4-42c2-40ef-9fb3-3187c1d88bc0"

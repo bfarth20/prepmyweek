@@ -1,6 +1,4 @@
 import React from "react";
-import { useEffect } from "react";
-import Constants from "expo-constants";
 import { Text, View } from "react-native";
 import RootNavigator from "./src/navigation/RootNavigator";
 import { useFonts, Inter_400Regular } from "@expo-google-fonts/inter";
