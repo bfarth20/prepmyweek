@@ -45,6 +45,7 @@ export default function GroceryListScreen({ route, navigation }: Props) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const hasLoadedRef = useRef(false);
+  const [sectionOrder, setSectionOrder] = useState<string[]>([]);
 
   const [customItems, setCustomItems] = useState<string[]>([]);
   const [newItem, setNewItem] = useState("");
@@ -55,6 +56,31 @@ export default function GroceryListScreen({ route, navigation }: Props) {
     CUSTOM_ITEMS: "customItems",
     CUSTOM_CHECKS: "customItemChecks",
     CHECKED_ITEMS: "checkedItems",
+  };
+
+  const moveSection = (section: string, direction: number) => {
+    const index = sectionOrder.indexOf(section);
+    const newIndex = index + direction;
+
+    if (index < 0 || newIndex < 0 || newIndex >= sectionOrder.length) return;
+
+    const newOrder = [...sectionOrder];
+    [newOrder[index], newOrder[newIndex]] = [
+      newOrder[newIndex],
+      newOrder[index],
+    ];
+    setSectionOrder(newOrder);
+
+    // Save to backend
+    axios
+      .post(
+        `${API_BASE_URL}/users/section-order`,
+        { order: newOrder },
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      .catch((err) => {
+        console.error("Failed to save section order", err);
+      });
   };
 
   async function saveData<T>(key: string, data: T) {
@@ -151,11 +177,33 @@ export default function GroceryListScreen({ route, navigation }: Props) {
             }
           );
 
-          if (isActive) {
-            const groceryList = new Map<string, Ingredient[]>(
-              Object.entries(groceryRes.data.groceryList)
+          const groceryList = new Map<string, Ingredient[]>(
+            Object.entries(groceryRes.data.groceryList)
+          );
+
+          let sectionOrder = Array.from(groceryList.keys()); // fallback default
+
+          try {
+            const orderRes = await axios.get(
+              `${API_BASE_URL}/users/section-order`,
+              {
+                headers: { Authorization: `Bearer ${token}` },
+              }
             );
+
+            if (orderRes.data.order && orderRes.data.order.length > 0) {
+              sectionOrder = orderRes.data.order;
+            } else {
+              sectionOrder = Array.from(groceryList.keys());
+            }
+          } catch (orderError) {
+            console.warn("⚠️ Failed to load section order, falling back.");
+            sectionOrder = Array.from(groceryList.keys());
+          }
+
+          if (isActive) {
             setGroupedIngredients(groceryList);
+            setSectionOrder(sectionOrder);
             setError(null);
           }
         } catch (err) {
@@ -256,10 +304,31 @@ export default function GroceryListScreen({ route, navigation }: Props) {
               <Text style={styles.title}>Grocery List</Text>
             </View>
 
-            {Array.from(groupedIngredients.entries()).map(
-              ([section, items]) => (
+            {sectionOrder.map((section) => {
+              const items = groupedIngredients.get(section);
+              if (!items) return null;
+
+              return (
                 <View key={section} style={styles.section}>
-                  <Text style={styles.sectionTitle}>{section}</Text>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Text style={styles.sectionTitle}>{section}</Text>
+                    <View style={{ flexDirection: "row" }}>
+                      <TouchableOpacity
+                        onPress={() => moveSection(section, -1)}
+                      >
+                        <Text>↑</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity onPress={() => moveSection(section, 1)}>
+                        <Text>↓</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
                   {items.map((ingredient) => {
                     const key = `${ingredient.id}-${ingredient.unit}`;
                     const label = `${ingredient.quantity} ${
@@ -267,10 +336,7 @@ export default function GroceryListScreen({ route, navigation }: Props) {
                     } ${ingredient.name}`;
 
                     return (
-                      <View
-                        key={`${ingredient.id}-${ingredient.unit}`}
-                        style={styles.ingredientRow}
-                      >
+                      <View key={key} style={styles.ingredientRow}>
                         <Checkbox
                           checked={checkedItems.includes(ingredient.id)}
                           onToggle={() => toggleItem(ingredient.id)}
@@ -280,8 +346,8 @@ export default function GroceryListScreen({ route, navigation }: Props) {
                     );
                   })}
                 </View>
-              )
-            )}
+              );
+            })}
 
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Add to Shopping List?</Text>

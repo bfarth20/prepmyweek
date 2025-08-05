@@ -3,7 +3,7 @@
     "name": "PrepMyWeek",
     "slug": "prepmyweek",
     "scheme": "prepmyweek",
-    "version": "1.0.9",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -16,13 +16,13 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.prepmyweek.app",
-      "buildNumber": "8",
+      "buildNumber": "9",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
-      "versionCode": 8,
+      "versionCode": 9,
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#d9f9fa"
@@ -33,10 +33,7 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [
-      "expo-secure-store",
-      "expo-font"
-    ],
+    "plugins": ["expo-secure-store", "expo-font"],
     "extra": {
       "eas": {
         "projectId": "696972c4-42c2-40ef-9fb3-3187c1d88bc0"

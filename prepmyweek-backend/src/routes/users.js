@@ -481,4 +481,36 @@ router.put("/preferMetric", requireUser, async (req, res) => {
   }
 });
 
+router.get("/section-order", requireUser, async (req, res) => {
+  const userId = req.user.id;
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { grocerySectionOrder: true },
+  });
+
+  res.json({ order: user?.grocerySectionOrder ?? null });
+});
+
+router.post("/section-order", requireUser, async (req, res) => {
+  const userId = req.user.id;
+  const { order } = req.body;
+
+  if (
+    !Array.isArray(order) ||
+    !order.every((item) => typeof item === "string")
+  ) {
+    return res.status(400).json({ error: "Invalid order format" });
+  }
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      grocerySectionOrder: order,
+    },
+  });
+
+  res.status(200).json({ success: true });
+});
+
 export default router;

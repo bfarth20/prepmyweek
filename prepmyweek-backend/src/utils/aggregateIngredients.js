@@ -9,9 +9,10 @@ const sectionLabels = {
   DAIRY: "Dairy Aisle",
   BEVERAGE: "Beverages",
   DELI: "Deli Aisle",
+  BREAD: "Bakery or Bread Aisle",
   BREAKFAST: "Breakfast",
   MEAT_SEAFOOD: "Meat & Seafood Aisle",
-  BAKING: "Bread or Bakery Aisle",
+  BAKING: "Baking Aisle",
   CHEESE: "Cheese Aisle",
   CANNED: "Canned Goods",
   DRY_GOOD: "Dry Goods",
@@ -104,12 +105,18 @@ export function aggregateIngredients(recipes, options = {}) {
           displayQuantity = converted.amount;
           displayUnit = converted.unit;
         } else if (unitType === "weight") {
-          const converted = convertOzToBestUnit(
-            normalizedQuantity,
-            preferMetric
-          );
-          displayQuantity = converted.amount;
-          displayUnit = converted.unit;
+          if (storeSection === "CANNED") {
+            // Force ounces display for canned goods
+            displayQuantity = normalizedQuantity;
+            displayUnit = "oz";
+          } else {
+            const converted = convertOzToBestUnit(
+              normalizedQuantity,
+              preferMetric
+            );
+            displayQuantity = converted.amount;
+            displayUnit = converted.unit;
+          }
         }
         // count-based units remain as is
       } catch (err) {
